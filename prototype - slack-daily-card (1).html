@@ -1,0 +1,996 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dailies — Slack Card Mockup</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
+<style>
+:root {
+  /* Slack chrome */
+  --slack-bg: #1a1d21;
+  --slack-sidebar: #19171d;
+  --slack-surface: #222529;
+  --slack-surface2: #2c2d30;
+  --slack-border: rgba(255,255,255,0.08);
+  --slack-text: #d1d2d3;
+  --slack-text2: #868789;
+  --slack-text3: #565856;
+  --slack-purple: #4a154b;
+  --slack-accent: #611f69;
+
+  /* Card brand */
+  --accent: #e8ff47;
+  --accent2: #7b61ff;
+  --accent3: #ff6b6b;
+  --card-bg: #1e1f22;
+  --card-border: #2e2f33;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  background: var(--slack-bg);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 14px;
+  color: var(--slack-text);
+  min-height: 100vh;
+  display: flex;
+}
+
+/* ── SLACK SIDEBAR ── */
+.slack-sidebar {
+  width: 220px;
+  flex-shrink: 0;
+  background: var(--slack-sidebar);
+  border-right: 1px solid var(--slack-border);
+  display: flex;
+  flex-direction: column;
+  padding-top: 0;
+}
+.ws-header {
+  padding: 14px 16px 10px;
+  border-bottom: 1px solid var(--slack-border);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.ws-logo {
+  width: 28px; height: 28px;
+  border-radius: 6px;
+  background: linear-gradient(135deg, #4a154b, #611f69);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 14px; font-weight: 800; color: #fff;
+  font-family: 'Syne', sans-serif;
+  flex-shrink: 0;
+}
+.ws-name { font-family: 'Syne', sans-serif; font-weight: 700; font-size: 14px; color: #fff; }
+.ws-status { width: 8px; height: 8px; border-radius: 50%; background: #2bac76; margin-left: auto; flex-shrink: 0; }
+.sidebar-section { padding: 16px 8px 4px; }
+.sidebar-label { font-size: 11px; font-weight: 600; color: var(--slack-text3); letter-spacing: .5px; text-transform: uppercase; padding: 0 8px 6px; font-family: 'DM Mono', monospace; }
+.channel-item {
+  display: flex; align-items: center; gap: 7px;
+  padding: 3px 8px; border-radius: 5px; cursor: pointer;
+  font-size: 13px; color: var(--slack-text2);
+  transition: all .1s;
+}
+.channel-item:hover { background: rgba(255,255,255,.06); color: var(--slack-text); }
+.channel-item.active { background: rgba(255,255,255,.1); color: #fff; }
+.channel-item .unread {
+  margin-left: auto;
+  background: var(--accent3);
+  color: #fff;
+  font-size: 10px;
+  font-weight: 700;
+  border-radius: 10px;
+  padding: 1px 6px;
+  font-family: 'DM Mono', monospace;
+}
+.channel-hash { opacity: .5; font-size: 15px; }
+.ch-dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
+.ch-online { background: #2bac76; }
+.ch-away { background: var(--slack-text3); }
+.divider { height: 1px; background: var(--slack-border); margin: 8px 16px; }
+
+/* ── MAIN CHANNEL ── */
+.channel-area { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+
+.channel-topbar {
+  height: 50px;
+  border-bottom: 1px solid var(--slack-border);
+  display: flex; align-items: center; padding: 0 20px; gap: 10px;
+  flex-shrink: 0;
+  background: var(--slack-bg);
+}
+.channel-name { font-weight: 600; font-size: 15px; color: #fff; display: flex; align-items: center; gap: 6px; }
+.channel-desc { font-size: 12px; color: var(--slack-text3); margin-left: 8px; padding-left: 8px; border-left: 1px solid var(--slack-border); }
+.topbar-actions { margin-left: auto; display: flex; gap: 10px; align-items: center; }
+.tb-action { width: 28px; height: 28px; border-radius: 5px; background: transparent; border: none; color: var(--slack-text2); cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all .15s; }
+.tb-action:hover { background: rgba(255,255,255,.08); color: var(--slack-text); }
+
+.messages { flex: 1; overflow-y: auto; padding: 20px 20px 12px; display: flex; flex-direction: column; gap: 0; }
+.messages::-webkit-scrollbar { width: 4px; }
+.messages::-webkit-scrollbar-thumb { background: rgba(255,255,255,.1); border-radius: 2px; }
+
+/* ── DATE DIVIDER ── */
+.date-divider {
+  display: flex; align-items: center; gap: 12px;
+  padding: 12px 0 8px; color: var(--slack-text3);
+  font-size: 12px; font-family: 'DM Mono', monospace;
+  letter-spacing: .3px;
+}
+.date-divider::before, .date-divider::after {
+  content: ''; flex: 1; height: 1px; background: var(--slack-border);
+}
+
+/* ── REGULAR MESSAGES ── */
+.msg {
+  display: flex; gap: 10px; padding: 4px 0;
+  transition: background .1s;
+  border-radius: 4px;
+  padding: 3px 4px;
+  margin: 0 -4px;
+}
+.msg:hover { background: rgba(255,255,255,.03); }
+.msg-av {
+  width: 32px; height: 32px; border-radius: 6px;
+  flex-shrink: 0; margin-top: 1px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 11px; font-weight: 700; color: #fff;
+}
+.msg-body { flex: 1; min-width: 0; }
+.msg-header { display: flex; align-items: baseline; gap: 8px; margin-bottom: 2px; }
+.msg-name { font-weight: 600; font-size: 13px; color: #fff; }
+.msg-time { font-size: 11px; color: var(--slack-text3); font-family: 'DM Mono', monospace; }
+.msg-text { font-size: 14px; color: var(--slack-text); line-height: 1.55; }
+.msg-text .mention { color: #5bc4f5; background: rgba(91,196,245,.1); padding: 0 3px; border-radius: 3px; cursor: pointer; }
+.msg-text .mention:hover { background: rgba(91,196,245,.2); }
+.msg-text code { font-family: 'DM Mono', monospace; font-size: 12px; background: rgba(255,255,255,.08); padding: 1px 5px; border-radius: 3px; color: #e0e0e0; }
+
+/* ── SLASH COMMAND GHOST ── */
+.slash-preview {
+  background: rgba(255,255,255,.04);
+  border: 1px solid var(--slack-border);
+  border-radius: 8px;
+  padding: 10px 14px;
+  margin: 6px 0 4px;
+  font-family: 'DM Mono', monospace;
+  font-size: 12px;
+  color: var(--slack-text2);
+  display: flex; align-items: center; gap: 8px;
+}
+.slash-cmd { color: var(--accent2); font-weight: 500; }
+.slash-desc { color: var(--slack-text3); }
+
+/* ═══════════════════════════════════════════
+   THE DAILY CARD — main event
+═══════════════════════════════════════════ */
+.daily-card {
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+  border-radius: 10px;
+  overflow: hidden;
+  margin: 6px 0 4px 42px;
+  max-width: 520px;
+  box-shadow: 0 4px 24px rgba(0,0,0,.4);
+  transition: border-color .2s, box-shadow .2s;
+  position: relative;
+  cursor: default;
+  animation: cardIn .4s cubic-bezier(.16,1,.3,1) both;
+}
+@keyframes cardIn {
+  from { opacity: 0; transform: translateY(8px) scale(.98); }
+  to   { opacity: 1; transform: none; }
+}
+.daily-card:hover { border-color: rgba(232,255,71,.2); box-shadow: 0 4px 32px rgba(0,0,0,.5), 0 0 0 1px rgba(232,255,71,.06); }
+
+/* Accent stripe top */
+.card-stripe {
+  height: 3px;
+  background: linear-gradient(90deg, var(--accent) 0%, var(--accent2) 50%, var(--accent3) 100%);
+}
+
+.card-inner { padding: 14px 16px 0; }
+
+/* Card header row */
+.card-header { display: flex; align-items: flex-start; gap: 12px; margin-bottom: 14px; }
+.card-icon {
+  width: 38px; height: 38px; border-radius: 8px;
+  background: rgba(232,255,71,.08);
+  border: 1px solid rgba(232,255,71,.15);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 18px; flex-shrink: 0;
+}
+.card-meta { flex: 1; }
+.card-title { font-family: 'Syne', sans-serif; font-weight: 700; font-size: 15px; color: #fff; margin-bottom: 3px; letter-spacing: -.2px; }
+.card-sub { display: flex; align-items: center; gap: 8px; font-size: 11px; color: var(--slack-text2); font-family: 'DM Mono', monospace; flex-wrap: wrap; }
+.card-sub .pipe { color: var(--slack-text3); }
+.card-sub .artist { color: var(--slack-text); font-weight: 500; }
+.card-sub .project { color: var(--accent2); }
+.vis-tag {
+  display: flex; align-items: center; gap: 4px;
+  padding: 1px 7px; border-radius: 10px; font-size: 10px;
+  font-family: 'DM Mono', monospace; letter-spacing: .3px;
+}
+.vis-team { background: rgba(109,255,109,.1); border: 1px solid rgba(109,255,109,.2); color: #6dff6d; }
+.vis-restricted { background: rgba(123,97,255,.1); border: 1px solid rgba(123,97,255,.25); color: var(--accent2); }
+.vis-private { background: rgba(255,107,107,.1); border: 1px solid rgba(255,107,107,.25); color: var(--accent3); }
+.vis-dot { width: 5px; height: 5px; border-radius: 50%; }
+
+/* Thumbnail grid */
+.card-thumbs {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 4px;
+  margin-bottom: 12px;
+}
+.thumb {
+  aspect-ratio: 16/9;
+  border-radius: 5px;
+  position: relative;
+  overflow: hidden;
+  cursor: pointer;
+  border: 1.5px solid transparent;
+  transition: all .15s;
+}
+.thumb:hover { border-color: var(--accent); transform: scale(1.03); z-index: 2; }
+.thumb canvas { width: 100%; height: 100%; display: block; }
+.thumb-badge {
+  position: absolute; bottom: 3px; right: 3px;
+  font-family: 'DM Mono', monospace; font-size: 7px;
+  background: rgba(0,0,0,.65); color: rgba(255,255,255,.6);
+  padding: 1px 4px; border-radius: 2px; letter-spacing: .3px;
+}
+.thumb-lock-overlay {
+  position: absolute; inset: 0;
+  background: rgba(0,0,0,.55);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 12px;
+}
+/* +N more thumb */
+.thumb-more {
+  aspect-ratio: 16/9;
+  border-radius: 5px;
+  background: var(--slack-surface2);
+  border: 1.5px solid var(--card-border);
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer;
+  transition: all .15s;
+}
+.thumb-more:hover { border-color: var(--accent2); background: rgba(123,97,255,.08); }
+.thumb-more-txt { font-family: 'Syne', sans-serif; font-size: 13px; font-weight: 700; color: var(--slack-text2); }
+.thumb-more:hover .thumb-more-txt { color: var(--accent2); }
+
+/* Stats row */
+.card-stats {
+  display: flex; align-items: center; gap: 14px;
+  padding: 10px 0;
+  border-top: 1px solid var(--card-border);
+  font-family: 'DM Mono', monospace;
+  font-size: 11px; color: var(--slack-text3);
+}
+.stat { display: flex; align-items: center; gap: 5px; }
+.stat-val { color: var(--slack-text); font-weight: 500; }
+.stat-dot { width: 4px; height: 4px; border-radius: 50%; background: var(--slack-text3); }
+
+/* Artists row */
+.card-artists {
+  display: flex; align-items: center; gap: 0;
+  padding-left: 2px;
+}
+.artist-av {
+  width: 20px; height: 20px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 8px; font-weight: 700;
+  border: 1.5px solid var(--card-bg);
+  margin-left: -4px; cursor: pointer; transition: transform .15s;
+}
+.artist-av:first-child { margin-left: 0; }
+.artist-av:hover { transform: scale(1.2); z-index: 5; }
+
+/* CTA buttons */
+.card-actions {
+  display: flex; gap: 8px; padding: 12px 16px;
+  border-top: 1px solid var(--card-border);
+  background: rgba(0,0,0,.2);
+}
+.cta-primary {
+  flex: 1;
+  display: flex; align-items: center; justify-content: center; gap: 7px;
+  padding: 8px 16px; border-radius: 6px;
+  background: var(--accent); color: #0a0a0c;
+  font-family: 'Syne', sans-serif; font-weight: 700; font-size: 12px;
+  cursor: pointer; transition: all .15s; border: none;
+  letter-spacing: .2px;
+}
+.cta-primary:hover { background: #d4eb00; transform: translateY(-1px); box-shadow: 0 4px 12px rgba(232,255,71,.25); }
+.cta-primary svg { flex-shrink: 0; }
+.cta-secondary {
+  display: flex; align-items: center; justify-content: center; gap: 6px;
+  padding: 8px 14px; border-radius: 6px;
+  background: transparent;
+  border: 1px solid var(--card-border);
+  color: var(--slack-text2);
+  font-family: 'DM Mono', monospace; font-size: 11px;
+  cursor: pointer; transition: all .15s; letter-spacing: .3px;
+}
+.cta-secondary:hover { border-color: rgba(255,255,255,.2); color: #fff; background: rgba(255,255,255,.05); }
+
+/* ── THREAD REPLIES ── */
+.thread-replies {
+  margin: 2px 0 2px 42px;
+  max-width: 520px;
+}
+.thread-reply {
+  display: flex; align-items: flex-start; gap: 8px;
+  padding: 5px 8px; border-radius: 5px;
+  transition: background .1s; cursor: pointer;
+  border-left: 2px solid var(--slack-border);
+  margin-left: 8px;
+}
+.thread-reply:hover { background: rgba(255,255,255,.03); border-left-color: rgba(255,255,255,.15); }
+.tr-av { width: 18px; height: 18px; border-radius: 4px; display: flex; align-items: center; justify-content: center; font-size: 8px; font-weight: 700; flex-shrink: 0; margin-top: 1px; }
+.tr-body { flex: 1; }
+.tr-name { font-size: 11px; font-weight: 600; color: var(--slack-text2); }
+.tr-text { font-size: 12px; color: var(--slack-text2); line-height: 1.45; }
+.tr-tc { font-family: 'DM Mono', monospace; font-size: 10px; color: var(--accent2); background: rgba(123,97,255,.1); border: 1px solid rgba(123,97,255,.2); padding: 0 5px; border-radius: 3px; margin-left: 5px; }
+.tr-time { font-size: 10px; color: var(--slack-text3); font-family: 'DM Mono', monospace; margin-left: auto; flex-shrink: 0; }
+.view-thread-btn {
+  display: flex; align-items: center; gap: 5px;
+  padding: 4px 10px; margin-left: 16px;
+  font-size: 11px; color: var(--accent2);
+  font-family: 'DM Mono', monospace;
+  cursor: pointer; border-radius: 4px; transition: all .15s;
+  width: fit-content;
+  letter-spacing: .3px;
+}
+.view-thread-btn:hover { background: rgba(123,97,255,.1); }
+
+/* ── UPLOAD UPDATE (sub-post after card) ── */
+.upload-update {
+  display: flex; align-items: flex-start; gap: 10px;
+  padding: 3px 4px; margin: 0 -4px;
+  transition: background .1s; border-radius: 4px;
+}
+.upload-update:hover { background: rgba(255,255,255,.03); }
+.uu-av { width: 32px; height: 32px; border-radius: 6px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; }
+.uu-body { flex: 1; }
+.uu-header { display: flex; align-items: baseline; gap: 8px; margin-bottom: 4px; }
+.uu-name { font-weight: 600; font-size: 13px; color: #fff; }
+.uu-time { font-size: 11px; color: var(--slack-text3); font-family: 'DM Mono', monospace; }
+.uu-text { font-size: 13px; color: var(--slack-text); margin-bottom: 6px; line-height: 1.5; }
+/* Mini upload card */
+.mini-card {
+  display: flex; align-items: center; gap: 10px;
+  background: var(--card-bg); border: 1px solid var(--card-border);
+  border-radius: 7px; padding: 8px 12px;
+  max-width: 340px; cursor: pointer; transition: all .15s;
+}
+.mini-card:hover { border-color: rgba(232,255,71,.2); }
+.mini-thumb { width: 56px; height: 32px; border-radius: 4px; overflow: hidden; flex-shrink: 0; }
+.mini-thumb canvas { width: 100%; height: 100%; display: block; }
+.mini-info { flex: 1; }
+.mini-name { font-size: 12px; font-weight: 500; color: #fff; margin-bottom: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.mini-meta { font-family: 'DM Mono', monospace; font-size: 10px; color: var(--slack-text3); display: flex; gap: 6px; }
+.mini-open {
+  font-family: 'DM Mono', monospace; font-size: 10px;
+  color: var(--accent2); border: 1px solid rgba(123,97,255,.25);
+  border-radius: 4px; padding: 3px 8px; cursor: pointer;
+  transition: all .15s; white-space: nowrap;
+}
+.mini-open:hover { background: rgba(123,97,255,.1); }
+
+/* ── EMOJI REACTIONS ── */
+.reactions { display: flex; gap: 4px; margin-top: 5px; flex-wrap: wrap; }
+.reaction {
+  display: flex; align-items: center; gap: 4px;
+  background: rgba(255,255,255,.06);
+  border: 1px solid rgba(255,255,255,.1);
+  border-radius: 5px; padding: 2px 7px;
+  font-size: 12px; cursor: pointer;
+  transition: all .12s;
+}
+.reaction:hover { background: rgba(255,255,255,.1); border-color: rgba(255,255,255,.2); }
+.reaction.mine { background: rgba(123,97,255,.15); border-color: rgba(123,97,255,.3); }
+.reaction-count { font-size: 11px; color: var(--slack-text2); font-family: 'DM Mono', monospace; }
+
+/* ── MESSAGE INPUT ── */
+.msg-input-area {
+  padding: 10px 16px 16px;
+  flex-shrink: 0;
+  border-top: 1px solid var(--slack-border);
+}
+.msg-input-box {
+  background: var(--slack-surface2);
+  border: 1px solid rgba(255,255,255,.12);
+  border-radius: 8px;
+  display: flex; flex-direction: column;
+  overflow: hidden;
+}
+.msg-input-toolbar {
+  display: flex; align-items: center; gap: 2px;
+  padding: 6px 8px;
+  border-bottom: 1px solid var(--slack-border);
+}
+.mib-btn { width: 26px; height: 26px; border-radius: 4px; background: transparent; border: none; color: var(--slack-text3); cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all .1s; font-size: 13px; }
+.mib-btn:hover { background: rgba(255,255,255,.08); color: var(--slack-text2); }
+.mib-div { width: 1px; height: 16px; background: var(--slack-border); margin: 0 4px; }
+.msg-input-field {
+  padding: 10px 12px 4px;
+  font-size: 14px; color: var(--slack-text);
+  line-height: 1.5; min-height: 44px;
+  display: flex; align-items: center; gap: 4px;
+}
+.input-placeholder { color: var(--slack-text3); }
+.slash-ghost {
+  display: inline-flex; align-items: center;
+  background: rgba(123,97,255,.12);
+  border: 1px solid rgba(123,97,255,.25);
+  border-radius: 4px; padding: 1px 8px;
+  font-family: 'DM Mono', monospace; font-size: 13px;
+  color: var(--accent2); animation: pulse 2s ease infinite;
+}
+@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.6} }
+.msg-input-footer { display: flex; align-items: center; padding: 4px 8px 6px; gap: 6px; }
+.mif-left { display: flex; gap: 2px; }
+.mif-right { margin-left: auto; }
+.send-btn {
+  display: flex; align-items: center; gap: 5px;
+  padding: 5px 14px; border-radius: 5px;
+  background: rgba(123,97,255,.8); border: none;
+  color: #fff; font-size: 12px; font-weight: 600;
+  font-family: 'DM Sans', sans-serif;
+  cursor: pointer; transition: all .15s;
+  opacity: .4;
+}
+
+/* ── ANNOTATION — explains the design ── */
+.annotations {
+  position: fixed;
+  right: 0; top: 0; bottom: 0;
+  width: 260px;
+  background: #0e0f11;
+  border-left: 1px solid rgba(255,255,255,.06);
+  padding: 20px 18px;
+  overflow-y: auto;
+  display: flex; flex-direction: column; gap: 0;
+}
+.ann-title {
+  font-family: 'Syne', sans-serif;
+  font-weight: 800; font-size: 13px;
+  color: var(--accent); letter-spacing: .5px;
+  text-transform: uppercase; margin-bottom: 16px;
+}
+.ann-item {
+  padding: 10px 0;
+  border-bottom: 1px solid rgba(255,255,255,.05);
+}
+.ann-item:last-child { border-bottom: none; }
+.ann-num {
+  font-family: 'DM Mono', monospace;
+  font-size: 9px; color: var(--accent);
+  letter-spacing: 1px; margin-bottom: 4px;
+}
+.ann-head {
+  font-family: 'Syne', sans-serif;
+  font-weight: 600; font-size: 12px; color: #fff;
+  margin-bottom: 4px;
+}
+.ann-body { font-size: 11px; color: var(--slack-text2); line-height: 1.6; }
+.ann-body code {
+  font-family: 'DM Mono', monospace;
+  font-size: 10px; color: var(--accent2);
+  background: rgba(123,97,255,.1);
+  padding: 1px 4px; border-radius: 3px;
+}
+
+/* scrollbar */
+::-webkit-scrollbar { width: 4px; }
+::-webkit-scrollbar-thumb { background: rgba(255,255,255,.08); border-radius: 2px; }
+</style>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<div class="slack-sidebar">
+  <div class="ws-header">
+    <div class="ws-logo">N</div>
+    <div class="ws-name">NUANCE_SWITCH</div>
+    <div class="ws-status"></div>
+  </div>
+
+  <div class="sidebar-section">
+    <div class="sidebar-label">Channels</div>
+    <div class="channel-item"><span class="channel-hash">#</span> general</div>
+    <div class="channel-item"><span class="channel-hash">#</span> announcements</div>
+    <div class="channel-item active">
+      <span class="channel-hash">#</span> renders
+      <span class="unread">3</span>
+    </div>
+    <div class="channel-item"><span class="channel-hash">#</span> crit</div>
+    <div class="channel-item"><span class="channel-hash">#</span> client-feedback</div>
+    <div class="channel-item"><span class="channel-hash">#</span> references</div>
+  </div>
+
+  <div class="divider"></div>
+
+  <div class="sidebar-section">
+    <div class="sidebar-label">Direct</div>
+    <div class="channel-item"><div class="ch-dot ch-online"></div> Jamie K <span style="font-size:10px;color:var(--slack-text3);margin-left:2px;">you</span></div>
+    <div class="channel-item"><div class="ch-dot ch-online"></div> Marcus R</div>
+    <div class="channel-item"><div class="ch-dot ch-away"></div> Aiko L</div>
+    <div class="channel-item"><div class="ch-dot ch-online"></div> Dev Chen</div>
+  </div>
+</div>
+
+<!-- CHANNEL -->
+<div class="channel-area">
+  <div class="channel-topbar">
+    <div class="channel-name">
+      <span style="opacity:.5;font-size:18px;">#</span>
+      renders
+    </div>
+    <div class="channel-desc">Daily uploads &amp; feedback for NUANCE_SWITCH</div>
+    <div class="topbar-actions">
+      <button class="tb-action" title="Search">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+      </button>
+      <button class="tb-action" title="Members">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+      </button>
+    </div>
+  </div>
+
+  <div class="messages" id="messages">
+
+    <div class="date-divider">Thursday, 5 March 2026</div>
+
+    <!-- Regular message -->
+    <div class="msg">
+      <div class="msg-av" style="background:#1b3a1b;color:#6dff6d;">MR</div>
+      <div class="msg-body">
+        <div class="msg-header">
+          <span class="msg-name">Marcus R</span>
+          <span class="msg-time">09:14</span>
+        </div>
+        <div class="msg-text">Morning everyone — finishing up the particle system pass today, should have something to show by noon 👀</div>
+      </div>
+    </div>
+
+    <div class="msg" style="margin-bottom:4px;">
+      <div class="msg-av" style="background:#2d1b4e;color:#7b61ff;">JK</div>
+      <div class="msg-body">
+        <div class="msg-header">
+          <span class="msg-name">Jamie K</span>
+          <span class="msg-time">09:31</span>
+        </div>
+        <div class="msg-text">Nice. <span class="mention">@Aiko L</span> can you review the brand ident when you're on? Client wants sign-off by EOD</div>
+      </div>
+    </div>
+
+    <!-- Slash command hint -->
+    <div style="margin:8px 0 2px 42px;">
+      <div class="slash-preview">
+        <span class="slash-cmd">/dailies</span>
+        <span style="color:var(--slack-text3);">·</span>
+        <span class="slash-desc">Create a daily review thread</span>
+      </div>
+    </div>
+
+    <!-- Artist posts their daily -->
+    <div class="msg" style="margin-top:4px;">
+      <div class="msg-av" style="background:#2d1b4e;color:#7b61ff;">JK</div>
+      <div class="msg-body">
+        <div class="msg-header">
+          <span class="msg-name">Jamie K</span>
+          <span class="msg-time">11:47</span>
+        </div>
+        <div class="msg-text">Posting today's daily — brand ident motion tests + client pitch cut</div>
+      </div>
+    </div>
+
+    <!-- ═══════════ THE DAILY CARD ═══════════ -->
+    <div class="daily-card" id="dailyCard">
+      <div class="card-stripe"></div>
+      <div class="card-inner">
+
+        <!-- Header -->
+        <div class="card-header">
+          <div class="card-icon">🎬</div>
+          <div class="card-meta">
+            <div class="card-title">Brand Ident — Motion Tests</div>
+            <div class="card-sub">
+              <span class="artist">Jamie K</span>
+              <span class="pipe">·</span>
+              <span class="project">NUANCE_SWITCH</span>
+              <span class="pipe">·</span>
+              <span>Thu 5 Mar · 11:47</span>
+              <div class="vis-tag vis-team">
+                <div class="vis-dot" style="background:#6dff6d;width:5px;height:5px;border-radius:50%;"></div>
+                Team
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Thumbnail grid -->
+        <div class="card-thumbs">
+          <div class="thumb" onclick="openDailies(0)" title="Brand_Ident_v04.mov">
+            <canvas id="ct0" width="120" height="68"></canvas>
+            <div class="thumb-badge">MOV</div>
+          </div>
+          <div class="thumb" onclick="openDailies(1)" title="Client_Pitch_v02.mp4">
+            <canvas id="ct1" width="120" height="68"></canvas>
+            <div class="thumb-badge">MP4</div>
+            <!-- restricted overlay -->
+            <div class="thumb-lock-overlay" style="font-size:10px;" title="Restricted">👥</div>
+          </div>
+          <div class="thumb" onclick="openDailies(2)" title="Particle_test_01.mp4">
+            <canvas id="ct2" width="120" height="68"></canvas>
+            <div class="thumb-badge">MP4</div>
+          </div>
+          <div class="thumb-more" onclick="openDailies()">
+            <div class="thumb-more-txt">+4</div>
+          </div>
+        </div>
+
+        <!-- Stats row -->
+        <div class="card-stats">
+          <div class="card-artists">
+            <div class="artist-av" style="background:#2d1b4e;color:#7b61ff;" title="Jamie K">JK</div>
+          </div>
+          <div class="stat-dot"></div>
+          <div class="stat"><span class="stat-val">7</span>&nbsp;uploads</div>
+          <div class="stat-dot"></div>
+          <div class="stat"><span class="stat-val">12</span>&nbsp;notes</div>
+          <div class="stat-dot"></div>
+          <div class="stat"><span class="stat-val">3</span>&nbsp;open</div>
+          <div class="stat-dot"></div>
+          <div class="stat" id="statusStat" style="cursor:pointer;" onclick="cycleStatus(this)">
+            <span style="color:var(--accent2);">● In review</span>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- CTA -->
+      <div class="card-actions">
+        <button class="cta-primary" onclick="openDailies()">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15,3 21,3 21,9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+          Open in Dailies
+        </button>
+        <button class="cta-secondary" onclick="toggleThread()">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
+          <span id="threadLabel">12 notes</span>
+        </button>
+        <button class="cta-secondary" onclick="toast('Link copied!')">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71"/></svg>
+        </button>
+      </div>
+    </div>
+
+    <!-- Reactions on the card -->
+    <div style="margin: 4px 0 8px 42px;">
+      <div class="reactions">
+        <div class="reaction mine">👀 <span class="reaction-count">4</span></div>
+        <div class="reaction">🔥 <span class="reaction-count">2</span></div>
+        <div class="reaction">✅ <span class="reaction-count">1</span></div>
+        <div class="reaction" style="padding: 2px 6px; color:var(--slack-text3);">+</div>
+      </div>
+    </div>
+
+    <!-- Thread replies (collapsible) -->
+    <div id="threadPanel" style="display:none;">
+      <div class="thread-replies">
+        <div class="thread-reply">
+          <div class="tr-av" style="background:#3a1b1b;color:#ff6b6b;">AL</div>
+          <div class="tr-body">
+            <span class="tr-name">Aiko L</span>
+            <div class="tr-text">The arc on the logo entrance at<span class="tr-tc">01:08</span> feels too abrupt — ease into it more?</div>
+          </div>
+          <div class="tr-time">11:52</div>
+        </div>
+        <div class="thread-reply">
+          <div class="tr-av" style="background:#1b3a1b;color:#6dff6d;">MR</div>
+          <div class="tr-body">
+            <span class="tr-name">Marcus R</span>
+            <div class="tr-text">Particle density at<span class="tr-tc">04:02</span> is heavy — drop to ~60%</div>
+          </div>
+          <div class="tr-time">12:03</div>
+        </div>
+        <div class="thread-reply">
+          <div class="tr-av" style="background:#1a2a3a;color:#61c8ff;">DC</div>
+          <div class="tr-body">
+            <span class="tr-name">Dev Chen</span>
+            <div class="tr-text">Colour at<span class="tr-tc">02:14</span> — purple hue feels warm, shift -8°</div>
+          </div>
+          <div class="tr-time">12:11</div>
+        </div>
+      </div>
+      <div class="view-thread-btn" onclick="openDailies()">
+        View all 12 notes in Dailies →
+      </div>
+    </div>
+
+    <!-- Later upload update -->
+    <div style="margin-top:16px;">
+      <div class="date-divider" style="font-size:10px;padding:8px 0 6px;">Later that day</div>
+      <div class="upload-update">
+        <div class="uu-av" style="background:#1b3a1b;color:#6dff6d;">MR</div>
+        <div class="uu-body">
+          <div class="uu-header">
+            <span class="uu-name">Marcus R</span>
+            <span class="uu-time">14:22</span>
+          </div>
+          <div class="uu-text">Added particle pass to today's daily 🎉</div>
+          <div class="mini-card" onclick="openDailies(2)">
+            <div class="mini-thumb"><canvas id="ct-mini" width="56" height="32"></canvas></div>
+            <div class="mini-info">
+              <div class="mini-name">Particle_test_v2.mp4</div>
+              <div class="mini-meta">
+                <span>MP4</span>
+                <span>·</span>
+                <span style="color:#6dff6d;">● Approved</span>
+              </div>
+            </div>
+            <div class="mini-open">Open ↗</div>
+          </div>
+          <div class="reactions" style="margin-top:6px;">
+            <div class="reaction">🎉 <span class="reaction-count">5</span></div>
+            <div class="reaction mine">✅ <span class="reaction-count">3</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Second artist daily card -->
+    <div style="margin-top:16px;">
+      <div class="msg">
+        <div class="msg-av" style="background:#1b3a1b;color:#6dff6d;">MR</div>
+        <div class="msg-body">
+          <div class="msg-header">
+            <span class="msg-name">Marcus R</span>
+            <span class="msg-time">15:05</span>
+          </div>
+          <div class="msg-text">Here's my daily — CG render pass + styleframes</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="daily-card" style="animation-delay:.1s;">
+      <div class="card-stripe" style="background: linear-gradient(90deg, #6dff6d 0%, #61c8ff 50%, #7b61ff 100%);"></div>
+      <div class="card-inner">
+        <div class="card-header">
+          <div class="card-icon" style="background:rgba(109,255,109,.08);border-color:rgba(109,255,109,.15);">✨</div>
+          <div class="card-meta">
+            <div class="card-title">CG Render Pass + Styleframes</div>
+            <div class="card-sub">
+              <span class="artist">Marcus R</span>
+              <span class="pipe">·</span>
+              <span class="project">NUANCE_SWITCH</span>
+              <span class="pipe">·</span>
+              <span>Thu 5 Mar · 15:05</span>
+              <div class="vis-tag vis-restricted">
+                <div class="vis-dot" style="background:var(--accent2);width:5px;height:5px;border-radius:50%;"></div>
+                Restricted
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="card-thumbs">
+          <div class="thumb"><canvas id="ct3" width="120" height="68"></canvas><div class="thumb-badge">EXR</div></div>
+          <div class="thumb"><canvas id="ct4" width="120" height="68"></canvas><div class="thumb-badge">PSD</div></div>
+          <div class="thumb-more"><div class="thumb-more-txt">+2</div></div>
+          <div></div>
+        </div>
+        <div class="card-stats">
+          <div class="card-artists">
+            <div class="artist-av" style="background:#1b3a1b;color:#6dff6d;" title="Marcus R">MR</div>
+          </div>
+          <div class="stat-dot"></div>
+          <div class="stat"><span class="stat-val">4</span>&nbsp;uploads</div>
+          <div class="stat-dot"></div>
+          <div class="stat"><span class="stat-val">3</span>&nbsp;notes</div>
+          <div class="stat-dot"></div>
+          <div class="stat"><span style="color:var(--accent);">● New</span></div>
+        </div>
+      </div>
+      <div class="card-actions">
+        <button class="cta-primary" style="background:rgba(109,255,109,.9);" onclick="openDailies()">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15,3 21,3 21,9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+          Open in Dailies
+        </button>
+        <button class="cta-secondary">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
+          3 notes
+        </button>
+        <button class="cta-secondary" onclick="toast('Link copied!')">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71"/></svg>
+        </button>
+      </div>
+    </div>
+
+    <div style="margin:4px 0 24px 42px;">
+      <div class="reactions">
+        <div class="reaction">👀 <span class="reaction-count">2</span></div>
+        <div class="reaction" style="padding: 2px 6px; color:var(--slack-text3);">+</div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- MESSAGE INPUT -->
+  <div class="msg-input-area">
+    <div class="msg-input-box">
+      <div class="msg-input-toolbar">
+        <button class="mib-btn" title="Bold"><b>B</b></button>
+        <button class="mib-btn" title="Italic"><i>I</i></button>
+        <button class="mib-btn" title="Strikethrough"><s>S</s></button>
+        <div class="mib-div"></div>
+        <button class="mib-btn" title="Link">🔗</button>
+        <button class="mib-btn" title="List">≡</button>
+        <button class="mib-btn" title="Code">&lt;/&gt;</button>
+      </div>
+      <div class="msg-input-field">
+        <span class="slash-ghost">/dailies</span>
+        <span style="color:var(--slack-text3);margin-left:6px;">— type to start your daily thread</span>
+      </div>
+      <div class="msg-input-footer">
+        <div class="mif-left">
+          <button class="mib-btn">➕</button>
+          <button class="mib-btn">😊</button>
+          <button class="mib-btn">@</button>
+        </div>
+        <div class="mif-right">
+          <button class="send-btn">Send</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ANNOTATIONS PANEL -->
+<div class="annotations">
+  <div class="ann-title">Design Notes</div>
+
+  <div class="ann-item">
+    <div class="ann-num">01 — SLASH COMMAND</div>
+    <div class="ann-head">Type /dailies to create</div>
+    <div class="ann-body">Artists type <code>/dailies</code> in any channel. A modal pops up for the session title + visibility. One submit → card drops into the channel.</div>
+  </div>
+
+  <div class="ann-item">
+    <div class="ann-num">02 — THE CARD</div>
+    <div class="ann-head">Visual anchor in the feed</div>
+    <div class="ann-body">Each daily gets a distinct card with a gradient stripe. CDs scrolling the channel can spot each artist's daily at a glance — no hunting through text.</div>
+  </div>
+
+  <div class="ann-item">
+    <div class="ann-num">03 — THUMBNAILS</div>
+    <div class="ann-head">See before you click</div>
+    <div class="ann-body">Up to 3 thumbnails inline, +N overflow. Locked/restricted assets show a 👥 icon instead of content. One click on any thumb deep-links into the Dailies viewer at that clip.</div>
+  </div>
+
+  <div class="ann-item">
+    <div class="ann-num">04 — VISIBILITY</div>
+    <div class="ann-head">Carried through from the app</div>
+    <div class="ann-body">The <code>Team</code> / <code>Restricted</code> / <code>Private</code> tag set in Dailies shows on the card. Restricted cards still appear in the channel — but locked assets are redacted.</div>
+  </div>
+
+  <div class="ann-item">
+    <div class="ann-num">05 — THREAD = NOTES</div>
+    <div class="ann-head">Timecoded replies in Slack</div>
+    <div class="ann-body">Notes left in Dailies appear as threaded replies beneath the card, with timecodes shown inline. The thread stays clean — CDs can skim notes without opening the app.</div>
+  </div>
+
+  <div class="ann-item">
+    <div class="ann-num">06 — UPLOAD UPDATES</div>
+    <div class="ann-head">Auto-posts as artists add files</div>
+    <div class="ann-body">When an artist uploads a new file to their daily throughout the day, a compact update is posted in the channel — keeping the team informed without creating noise.</div>
+  </div>
+
+  <div class="ann-item">
+    <div class="ann-num">07 — STATUS</div>
+    <div class="ann-head">Live on the card</div>
+    <div class="ann-body">Click the status in the card to cycle — <code>New → In review → Approved</code>. Updates instantly in both Slack and the Dailies app. No extra step.</div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div id="toast" style="position:fixed;bottom:80px;left:50%;transform:translateX(-50%) translateY(10px);background:#2c2d30;border:1px solid rgba(255,255,255,.12);border-radius:7px;padding:8px 16px;font-family:'DM Mono',monospace;font-size:12px;color:#d1d2d3;opacity:0;transition:all .25s;pointer-events:none;z-index:999;box-shadow:0 8px 24px rgba(0,0,0,.5);white-space:nowrap;"></div>
+
+<script>
+// ── DRAW THUMBNAILS ─────────────────────────────────────────
+const PALS = [
+  ['#1a1a2e','#7b61ff','#e8ff47'],
+  ['#1a0a0a','#ff6b6b','#ff9f43'],
+  ['#0a0a1a','#7b61ff','#61c8ff'],
+  ['#0a1a12','#6dff6d','#e8ff47'],
+  ['#1a0e0e','#ff6b6b','#ffcc44'],
+];
+
+function drawThumb(id, pal, w, h) {
+  const canvas = document.getElementById(id);
+  if (!canvas) return;
+  canvas.width = w; canvas.height = h;
+  const ctx = canvas.getContext('2d');
+  // bg
+  const g = ctx.createLinearGradient(0,0,w,h);
+  g.addColorStop(0, pal[0]); g.addColorStop(1, pal[0]+'aa');
+  ctx.fillStyle = g; ctx.fillRect(0,0,w,h);
+  // radial glow
+  ctx.globalAlpha = .45;
+  const rg = ctx.createRadialGradient(w*.3, h*.5, 1, w*.3, h*.5, w*.4);
+  rg.addColorStop(0, pal[1]+'99'); rg.addColorStop(1, 'transparent');
+  ctx.fillStyle = rg; ctx.fillRect(0,0,w,h);
+  // circle accent
+  ctx.globalAlpha = .3;
+  ctx.beginPath(); ctx.arc(w*.72, h*.32, h*.35, 0, Math.PI*2);
+  ctx.fillStyle = pal[2]+'55'; ctx.fill();
+  // stripe
+  ctx.globalAlpha = .2;
+  const sg = ctx.createLinearGradient(w*.15, 0, w*.19, h);
+  sg.addColorStop(0, pal[2]); sg.addColorStop(1, 'transparent');
+  ctx.fillStyle = sg; ctx.fillRect(w*.15, 0, w*.04, h*.7);
+  ctx.globalAlpha = 1;
+  // label
+  ctx.font = `bold ${Math.floor(h*.22)}px Syne, sans-serif`;
+  ctx.fillStyle = 'rgba(255,255,255,.7)';
+  ctx.fillText(pal[2]==='#e8ff47'?'BRAND':pal[2]==='#ff9f43'?'PITCH':'PTCL', w*.08, h*.72);
+}
+
+drawThumb('ct0', PALS[0], 120, 68);
+drawThumb('ct1', PALS[1], 120, 68);
+drawThumb('ct2', PALS[2], 120, 68);
+drawThumb('ct3', PALS[3], 120, 68);
+drawThumb('ct4', PALS[4], 120, 68);
+drawThumb('ct-mini', PALS[2], 56, 32);
+
+// ── INTERACTIONS ───────────────────────────────────────────
+let threadOpen = false;
+function toggleThread() {
+  threadOpen = !threadOpen;
+  document.getElementById('threadPanel').style.display = threadOpen ? 'block' : 'none';
+  document.getElementById('threadLabel').textContent = threadOpen ? 'Hide notes' : '12 notes';
+  if (threadOpen) document.getElementById('threadPanel').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+
+const statuses = [
+  { label: '● New', color: 'var(--accent)' },
+  { label: '● In review', color: 'var(--accent2)' },
+  { label: '✓ Approved', color: '#6dff6d' },
+];
+let statusIdx = 1;
+function cycleStatus(el) {
+  statusIdx = (statusIdx + 1) % statuses.length;
+  const s = statuses[statusIdx];
+  el.querySelector('span').textContent = s.label;
+  el.querySelector('span').style.color = s.color;
+  showToast(s.label.replace('● ','').replace('✓ ','') + ' — status updated');
+}
+
+function openDailies(idx) {
+  showToast('Opening in Dailies…');
+}
+
+let toastTimer;
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.style.opacity = '1';
+  t.style.transform = 'translateX(-50%) translateY(0)';
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => {
+    t.style.opacity = '0';
+    t.style.transform = 'translateX(-50%) translateY(10px)';
+  }, 2200);
+}
+function toast(msg) { showToast(msg); }
+
+// Auto-scroll to bottom on load
+window.addEventListener('load', () => {
+  const msgs = document.getElementById('messages');
+  msgs.scrollTop = msgs.scrollHeight * .3;
+});
+</script>
+</body>
+</html>

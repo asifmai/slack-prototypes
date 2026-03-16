@@ -1,0 +1,2692 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dailies</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:ital,wght@0,300;0,400;0,500;1,300&family=Syne:wght@400;500;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:#0a0a0c; --surface:#111114; --surface2:#18181d; --surface3:#1f1f26;
+  --border:#2a2a35; --border2:#353545;
+  --accent:#e8ff47; --accent2:#7b61ff; --accent3:#ff6b6b;
+  --text:#f0f0f5; --text2:#8888a0; --text3:#555568;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px;height:100vh;overflow:hidden;display:flex;flex-direction:column;}
+
+/* ── TOPBAR ── */
+.topbar{display:flex;align-items:center;gap:0;padding:0 20px;height:54px;border-bottom:1px solid var(--border);background:var(--surface);flex-shrink:0;}
+/* Logo — home link */
+.logo{font-family:'Syne',sans-serif;font-weight:800;font-size:17px;letter-spacing:-.5px;color:var(--accent);cursor:pointer;flex-shrink:0;transition:opacity .15s;margin-right:18px;}
+.logo:hover{opacity:.75;}
+/* Divider between logo and board identity */
+.topbar-sep{width:1px;height:22px;background:var(--border2);flex-shrink:0;margin-right:16px;}
+/* Board owner identity block */
+.board-identity{display:flex;align-items:center;gap:11px;flex-shrink:0;}
+.board-owner-av{width:34px;height:34px;border-radius:50%;border:2px solid var(--border2);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex-shrink:0;position:relative;transition:border-color .2s;}
+.board-owner-av .live-dot{position:absolute;bottom:-1px;right:-1px;width:9px;height:9px;border-radius:50%;border:2px solid var(--surface);z-index:2;}
+.board-owner-text{}
+.board-owner-name{font-family:'Syne',sans-serif;font-weight:700;font-size:14px;color:var(--text);letter-spacing:-.2px;line-height:1.2;}
+.board-owner-sub{font-family:'DM Mono',monospace;font-size:10px;color:var(--text3);letter-spacing:.3px;margin-top:1px;display:flex;align-items:center;gap:5px;}
+.board-channel-tag{font-family:'DM Mono',monospace;font-size:10px;background:var(--surface3);border:1px solid var(--border2);border-radius:4px;padding:2px 8px;color:var(--text2);letter-spacing:.4px;}
+.board-date-tag{color:var(--text3);}
+/* Viewing-own badge */
+.board-you-tag{font-family:'DM Mono',monospace;font-size:8px;color:var(--accent);background:rgba(232,255,71,.08);border:1px solid rgba(232,255,71,.2);border-radius:3px;padding:1px 6px;letter-spacing:.4px;}
+/* Topbar right */
+.topbar-right{margin-left:auto;display:flex;align-items:center;gap:8px;}
+/* Small member avatars */
+.avatar-p{width:26px;height:26px;border-radius:50%;border:1.5px solid var(--border2);display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;cursor:pointer;transition:all .2s;position:relative;flex-shrink:0;}
+.avatar-p:hover{border-color:var(--accent2);transform:scale(1.1);}
+.avatar-p.is-you{border-color:var(--accent);}
+/* Live presence dot */
+.avatar-p .live-dot{position:absolute;bottom:-1px;right:-1px;width:7px;height:7px;border-radius:50%;border:1.5px solid var(--surface);z-index:2;}
+.live-dot.online{background:#6dff6d;box-shadow:0 0 4px rgba(109,255,109,.6);}
+.live-dot.away{background:#ffcc44;}
+.live-dot.offline{background:var(--border2);}
+/* Hover tooltip */
+.avatar-p .av-tip{position:absolute;bottom:calc(100% + 8px);left:50%;transform:translateX(-50%);background:var(--surface3);border:1px solid var(--border2);border-radius:5px;padding:5px 10px;white-space:nowrap;pointer-events:none;opacity:0;transition:opacity .15s;z-index:50;min-width:110px;text-align:center;}
+.avatar-p:hover .av-tip{opacity:1;}
+.av-tip-name{font-size:11px;font-weight:600;color:var(--text);font-family:'DM Sans',sans-serif;}
+.av-tip-status{font-size:9px;color:var(--text3);font-family:'DM Mono',monospace;margin-top:2px;}
+.av-tip-count{font-size:9px;color:var(--accent);font-family:'DM Mono',monospace;margin-top:1px;}
+.av-tip-role{font-size:8px;font-family:'DM Mono',monospace;margin-top:3px;}
+.ap1{background:#2d1b4e;color:var(--accent2);}
+.ap2{background:#1b3a1b;color:#6dff6d;}
+.ap3{background:#3a1b1b;color:var(--accent3);}
+.ap4{background:#1a2a3a;color:#61c8ff;}
+.ap5{background:#2a2a1a;color:#ffcc44;}
+/* Member avatars cluster — other board members */
+.member-avatars{display:flex;align-items:center;gap:4px;margin-right:6px;}
+.member-sep{width:1px;height:18px;background:var(--border);margin:0 4px;}
+/* Archive button */
+.archive-btn{display:flex;align-items:center;gap:6px;padding:5px 13px;border-radius:5px;border:1px solid var(--border2);background:var(--surface3);color:var(--text2);font-family:'DM Mono',monospace;font-size:11px;cursor:pointer;transition:all .15s;letter-spacing:.3px;}
+.archive-btn:hover{border-color:var(--accent);color:var(--accent);}
+.archive-btn svg{opacity:.6;}
+/* My avatar — top right, signed-in user */
+.my-avatar{width:30px;height:30px;border-radius:50%;border:2px solid var(--accent);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;cursor:pointer;flex-shrink:0;position:relative;transition:all .2s;}
+.my-avatar:hover{opacity:.85;}
+.my-avatar .av-tip{position:absolute;bottom:calc(100% + 8px);right:0;left:auto;transform:none;background:var(--surface3);border:1px solid var(--border2);border-radius:5px;padding:5px 10px;white-space:nowrap;pointer-events:none;opacity:0;transition:opacity .15s;z-index:50;min-width:110px;text-align:center;}
+.my-avatar:hover .av-tip{opacity:1;}
+
+/* ── MAIN ── */
+.main{flex:1;display:flex;overflow:hidden;}
+
+/* ── SIDEBAR ── */
+.sidebar{width:200px;flex-shrink:0;border-right:1px solid var(--border);display:flex;flex-direction:column;background:var(--surface);overflow:hidden;}
+.sidebar-header{padding:12px 14px 10px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-shrink:0;}
+.today-label{font-family:'Syne',sans-serif;font-weight:700;font-size:13px;color:var(--text);}
+.today-date{font-family:'DM Mono',monospace;font-size:9px;color:var(--text3);letter-spacing:.5px;margin-top:2px;}
+.add-btn{width:24px;height:24px;border-radius:5px;background:var(--surface3);border:1px solid var(--border2);color:var(--text2);font-size:16px;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .15s;flex-shrink:0;}
+.add-btn:hover{border-color:var(--accent);color:var(--accent);}
+
+/* Thumbnail list */
+.thumb-list{flex:1;overflow-y:auto;padding:8px 8px 4px;}
+.thumb-list::-webkit-scrollbar{width:3px;}
+.thumb-list::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px;}
+
+/* Full-width card */
+.thumb-item{display:flex;flex-direction:column;border-radius:7px;cursor:pointer;transition:all .14s;border:1.5px solid transparent;margin-bottom:7px;position:relative;overflow:hidden;background:var(--surface2);}
+.thumb-item:hover{border-color:var(--border2);background:var(--surface3);}
+.thumb-item.active{border-color:var(--accent);background:var(--surface3);}
+.thumb-item.locked{opacity:.38;cursor:not-allowed;}
+.thumb-item.locked:hover{border-color:transparent;background:var(--surface2);}
+/* visibility top stripe */
+.thumb-item.vis-restricted{border-color:rgba(123,97,255,.35);}
+.thumb-item.vis-restricted.active{border-color:var(--accent2);}
+.thumb-item.vis-private{border-color:rgba(255,107,107,.35);}
+.thumb-item.vis-private.active{border-color:var(--accent3);}
+
+/* Thumbnail image — full width, 16:9 */
+.thumb-img{width:100%;aspect-ratio:16/9;position:relative;overflow:hidden;flex-shrink:0;}
+.thumb-canvas{width:100%;height:100%;display:block;}
+.thumb-type-badge{position:absolute;bottom:4px;right:5px;font-family:'DM Mono',monospace;font-size:8px;color:rgba(255,255,255,.55);line-height:1;letter-spacing:.3px;background:rgba(0,0,0,.4);padding:1px 4px;border-radius:2px;}
+.thumb-overlay-lock{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.55);font-size:16px;}
+
+/* Text below thumbnail */
+.thumb-info{padding:6px 8px 7px;}
+.thumb-name{font-size:11px;font-weight:500;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:4px;}
+.thumb-item.active .thumb-name{color:var(--accent);}
+.thumb-meta{display:flex;align-items:center;gap:6px;}
+.thumb-count{font-family:'DM Mono',monospace;font-size:9px;color:var(--text3);}
+.vis-dot-small{width:5px;height:5px;border-radius:50%;flex-shrink:0;}
+.vd-public{background:#6dff6d;} .vd-restricted{background:var(--accent2);} .vd-private{background:var(--accent3);}
+.status-pip{width:5px;height:5px;border-radius:50%;flex-shrink:0;margin-left:auto;}
+.sp-new{background:var(--accent);} .sp-review{background:var(--accent2);} .sp-approved{background:#6dff6d;}
+
+.sidebar-footer{border-top:1px solid var(--border);padding:10px 12px;flex-shrink:0;}
+.upload-area{border:1px dashed var(--border2);border-radius:5px;padding:10px;text-align:center;cursor:pointer;transition:all .15s;}
+.upload-area:hover{border-color:var(--accent);background:rgba(232,255,71,.03);}
+.upload-text{font-size:11px;color:var(--text3);line-height:1.6;}
+.upload-text strong{color:var(--accent);font-weight:500;}
+
+/* ── VIEWER ── */
+.viewer{flex:1;display:flex;flex-direction:column;overflow:hidden;background:var(--bg);}
+.viewer-header{padding:10px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px;flex-shrink:0;background:var(--surface);}
+.viewer-title{font-family:'Syne',sans-serif;font-size:14px;font-weight:600;color:var(--text);}
+.vis-pill{display:flex;align-items:center;gap:5px;padding:4px 11px;border-radius:20px;font-size:11px;font-family:'DM Mono',monospace;cursor:pointer;transition:all .15s;border:1px solid transparent;user-select:none;letter-spacing:.3px;}
+.vis-pill.public{background:rgba(109,255,109,.08);border-color:rgba(109,255,109,.2);color:#6dff6d;}
+.vis-pill.public:hover{background:rgba(109,255,109,.14);}
+.vis-pill.restricted{background:rgba(123,97,255,.1);border-color:rgba(123,97,255,.3);color:var(--accent2);}
+.vis-pill.restricted:hover{background:rgba(123,97,255,.18);}
+.vis-pill.private{background:rgba(255,107,107,.1);border-color:rgba(255,107,107,.3);color:var(--accent3);}
+.vis-pill.private:hover{background:rgba(255,107,107,.18);}
+.vp-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0;}
+.vis-pill.public .vp-dot{background:#6dff6d;}
+.vis-pill.restricted .vp-dot{background:var(--accent2);}
+.vis-pill.private .vp-dot{background:var(--accent3);}
+.viewer-actions{margin-left:auto;display:flex;gap:8px;align-items:center;}
+.dl-btn{display:flex;align-items:center;gap:6px;padding:6px 14px;border-radius:5px;border:1px solid var(--border2);background:var(--surface3);color:var(--text2);font-family:'DM Sans',sans-serif;font-size:11px;font-weight:500;cursor:pointer;transition:all .15s;}
+.dl-btn:hover{border-color:var(--accent);color:var(--accent);}
+
+/* ── VIDEO ── */
+.video-container{flex:1;position:relative;display:flex;align-items:center;justify-content:center;background:#060608;overflow:hidden;}
+.video-mock{width:100%;height:100%;display:flex;align-items:center;justify-content:center;background:linear-gradient(160deg,#0d0d14,#060608 60%,#0a0812);}
+.video-frame{position:relative;width:calc(100% - 40px);max-width:960px;aspect-ratio:16/9;border-radius:4px;overflow:hidden;cursor:pointer;box-shadow:0 0 0 1px var(--border),0 40px 80px rgba(0,0,0,.8);transition:box-shadow .3s;}
+.video-frame.is-private{box-shadow:0 0 0 1.5px rgba(255,107,107,.5),0 40px 80px rgba(0,0,0,.8),0 0 40px rgba(255,107,107,.08);}
+.video-frame.is-restricted{box-shadow:0 0 0 1.5px rgba(123,97,255,.5),0 40px 80px rgba(0,0,0,.8),0 0 40px rgba(123,97,255,.08);}
+#mainCanvas{width:100%;height:100%;display:block;}
+.draw-overlay{position:absolute;inset:0;pointer-events:none;z-index:5;}
+.annotation-pin{position:absolute;width:24px;height:24px;border-radius:50% 50% 50% 0;transform:rotate(-45deg);cursor:pointer;transition:transform .15s;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 8px rgba(0,0,0,.5);z-index:10;}
+.annotation-pin:hover{transform:rotate(-45deg) scale(1.2);}
+.annotation-pin .pn{transform:rotate(45deg);font-family:'DM Mono',monospace;font-size:9px;font-weight:700;color:#0a0a0c;}
+.pin-r{background:var(--accent3);} .pin-p{background:var(--accent2);} .pin-y{background:var(--accent);}
+.play-overlay{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.2);transition:opacity .2s;z-index:3;}
+.play-big{width:60px;height:60px;border-radius:50%;background:rgba(232,255,71,.9);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:transform .15s;box-shadow:0 0 40px rgba(232,255,71,.3);}
+.play-big:hover{transform:scale(1.1);background:var(--accent);}
+.play-big svg{margin-left:4px;}
+/* Fullscreen button — bottom-right of video frame */
+.fs-btn{position:absolute;bottom:10px;right:10px;width:30px;height:30px;border-radius:5px;background:rgba(0,0,0,.45);border:1px solid rgba(255,255,255,.1);color:rgba(255,255,255,.6);display:flex;align-items:center;justify-content:center;cursor:pointer;z-index:12;transition:all .15s;backdrop-filter:blur(4px);}
+.fs-btn:hover{background:rgba(0,0,0,.7);border-color:rgba(255,255,255,.25);color:#fff;transform:scale(1.08);}
+/* Fullscreen: the entire viewer panel goes full-screen */
+.viewer.fullscreen{position:fixed;inset:0;z-index:500;background:#000;}
+.viewer.fullscreen .video-container{background:#000;}
+.viewer.fullscreen .video-frame{width:100%!important;max-width:100%!important;border-radius:0;box-shadow:none!important;}
+/* In fullscreen the controls sit at the bottom, semi-transparent */
+.viewer.fullscreen .controls{background:rgba(10,10,12,.85);border-top:1px solid rgba(255,255,255,.06);backdrop-filter:blur(12px);}
+.viewer.fullscreen .viewer-header{display:none;}
+
+/* ── CONTROLS ── */
+.controls{flex-shrink:0;background:var(--surface);border-top:1px solid var(--border);padding:0 20px;}
+.timeline-area{padding:10px 0 0;}
+.timeline-track{height:32px;background:var(--surface3);border-radius:4px;position:relative;cursor:pointer;overflow:visible;border:1px solid var(--border);}
+/* Waveform canvas fills the track exactly */
+#waveform{position:absolute;inset:0;display:block;width:100%;height:100%;border-radius:3px;pointer-events:none;}
+.playhead{position:absolute;top:-4px;bottom:-4px;width:2px;background:var(--accent);left:34%;z-index:10;cursor:ew-resize;}
+.playhead::before{content:'';position:absolute;top:-1px;left:50%;transform:translateX(-50%);width:10px;height:10px;background:var(--accent);border-radius:50%;}
+.timeline-marker{position:absolute;bottom:-1px;width:3px;height:16px;border-radius:1px;z-index:8;cursor:pointer;transition:height .15s;}
+.timeline-marker:hover{height:32px;}
+.tm-r{background:var(--accent3);} .tm-p{background:var(--accent2);} .tm-y{background:var(--accent);}
+.marker-tip{position:absolute;bottom:100%;left:50%;transform:translateX(-50%);background:var(--surface3);border:1px solid var(--border2);border-radius:3px;padding:2px 8px;font-family:'DM Mono',monospace;font-size:9px;color:var(--text2);white-space:nowrap;pointer-events:none;display:none;margin-bottom:4px;z-index:20;}
+.timeline-marker:hover .marker-tip{display:block;}
+.playback-row{display:flex;align-items:center;padding:8px 0 10px;gap:8px;}
+.ctrl-btn{width:28px;height:28px;border-radius:4px;background:transparent;border:1px solid transparent;color:var(--text2);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .12s;}
+.ctrl-btn:hover{background:var(--surface3);border-color:var(--border);color:var(--text);}
+.ctrl-play{width:32px;height:32px;border-radius:5px;background:var(--accent);border:none;color:#0a0a0c;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .12s;}
+.ctrl-play:hover{background:#d4eb00;transform:scale(1.05);}
+.tc-display{font-family:'DM Mono',monospace;font-size:12px;color:var(--text2);letter-spacing:1px;min-width:100px;}
+.tc-total{font-family:'DM Mono',monospace;font-size:10px;color:var(--text3);}
+.ctrl-spacer{flex:1;}
+.tool-group{display:flex;gap:2px;background:var(--surface3);border:1px solid var(--border);border-radius:5px;padding:2px;}
+.tool-btn{width:26px;height:26px;border-radius:3px;background:transparent;border:none;color:var(--text2);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .12s;position:relative;}
+.tool-btn:hover{background:var(--border2);color:var(--text);}
+.tool-btn.active{background:var(--accent);color:#0a0a0c;}
+.tool-btn[data-tip]:hover::after{content:attr(data-tip);position:absolute;bottom:calc(100% + 6px);left:50%;transform:translateX(-50%);background:var(--surface3);border:1px solid var(--border2);color:var(--text2);font-size:10px;font-family:'DM Mono',monospace;white-space:nowrap;padding:3px 8px;border-radius:3px;pointer-events:none;z-index:100;}
+.fps-badge{font-family:'DM Mono',monospace;font-size:10px;color:var(--text3);border:1px solid var(--border);border-radius:3px;padding:3px 7px;cursor:pointer;transition:all .12s;}
+.fps-badge:hover{color:var(--text2);border-color:var(--border2);}
+.fc{font-family:'DM Mono',monospace;font-size:10px;color:var(--text3);margin-left:4px;}
+
+/* Speed control */
+.speed-wrap{position:relative;}
+.speed-btn{font-family:'DM Mono',monospace;font-size:10px;color:var(--text2);border:1px solid var(--border2);background:var(--surface3);border-radius:3px;padding:3px 9px;cursor:pointer;transition:all .12s;min-width:36px;text-align:center;}
+.speed-btn:hover{border-color:var(--accent);color:var(--accent);}
+.speed-btn.active{border-color:var(--accent);color:var(--accent);background:rgba(232,255,71,.08);}
+.speed-menu{position:absolute;bottom:calc(100% + 6px);left:50%;transform:translateX(-50%);background:var(--surface);border:1px solid var(--border2);border-radius:7px;padding:4px;display:none;flex-direction:column;gap:1px;box-shadow:0 12px 32px rgba(0,0,0,.6);z-index:200;min-width:70px;}
+.speed-menu.open{display:flex;}
+.speed-opt{font-family:'DM Mono',monospace;font-size:11px;color:var(--text2);padding:5px 12px;border-radius:4px;cursor:pointer;transition:all .1s;text-align:center;white-space:nowrap;}
+.speed-opt:hover{background:var(--surface3);color:var(--text);}
+.speed-opt.active{color:var(--accent);background:rgba(232,255,71,.08);}
+/* Scrubbing cursor on timeline */
+.timeline-track{cursor:col-resize;}
+.timeline-track.scrubbing{cursor:col-resize;user-select:none;}
+
+/* ── COMMENT PANEL ── */
+.comment-panel{width:290px;flex-shrink:0;border-left:1px solid var(--border);display:flex;flex-direction:column;background:var(--surface);overflow:hidden;}
+.cp-header{padding:12px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;}
+.cp-title{font-family:'Syne',sans-serif;font-size:13px;font-weight:600;color:var(--text);display:flex;align-items:center;gap:8px;}
+.cc{font-family:'DM Mono',monospace;font-size:10px;background:var(--surface3);border:1px solid var(--border2);padding:1px 7px;border-radius:10px;color:var(--text2);}
+.cp-filter{display:flex;gap:3px;padding:8px 12px 0;border-bottom:1px solid var(--border);}
+.fchip{font-size:10px;font-family:'DM Mono',monospace;padding:2px 8px;border-radius:3px;cursor:pointer;border:1px solid transparent;color:var(--text3);background:transparent;transition:all .12s;margin-bottom:8px;}
+.fchip:hover{color:var(--text2);}
+.fchip.active{border-color:var(--border2);background:var(--surface3);color:var(--text2);}
+.comments-list{flex:1;overflow-y:auto;padding:8px;}
+.comments-list::-webkit-scrollbar{width:3px;}
+.comments-list::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px;}
+.citem{padding:10px 12px;border-radius:6px;border:1px solid var(--border);background:var(--surface2);margin-bottom:6px;cursor:pointer;transition:all .12s;position:relative;animation:fadeIn .2s ease;}
+.citem:hover{border-color:var(--border2);background:var(--surface3);}
+.citem.active{border-color:var(--accent2);}
+@keyframes fadeIn{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
+.ci-hd{display:flex;align-items:center;gap:8px;margin-bottom:7px;}
+.ci-av{width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;flex-shrink:0;}
+.ci-nm{font-size:11px;font-weight:500;color:var(--text);flex:1;}
+.ci-tc{font-family:'DM Mono',monospace;font-size:10px;color:var(--accent2);background:rgba(123,97,255,.1);border:1px solid rgba(123,97,255,.2);padding:1px 7px;border-radius:3px;cursor:pointer;transition:all .12s;letter-spacing:.5px;}
+.ci-tc:hover{background:rgba(123,97,255,.2);}
+.ci-body{font-size:12px;color:var(--text2);line-height:1.55;margin-bottom:8px;}
+.ci-foot{display:flex;align-items:center;gap:8px;}
+.ci-rx{font-size:11px;color:var(--text3);cursor:pointer;padding:2px 5px;border-radius:3px;transition:all .12s;font-family:'DM Mono',monospace;}
+.ci-rx:hover{background:var(--surface3);color:var(--text2);}
+.ci-rp{font-size:10px;color:var(--text3);cursor:pointer;margin-left:auto;padding:2px 8px;border-radius:3px;border:1px solid transparent;transition:all .12s;}
+.ci-rp:hover{border-color:var(--border2);color:var(--text2);}
+.cstat{position:absolute;top:10px;right:10px;width:6px;height:6px;border-radius:50%;}
+.st-open{background:var(--accent3);} .st-wip{background:var(--accent2);} .st-done{background:#6dff6d;}
+.cp-input{padding:12px;border-top:1px solid var(--border);background:var(--surface);}
+.tc-badge{font-family:'DM Mono',monospace;font-size:10px;color:var(--accent2);margin-bottom:6px;display:flex;align-items:center;gap:5px;}
+.tc-badge::before{content:'';width:5px;height:5px;border-radius:50%;background:var(--accent3);animation:blink 1s ease infinite;}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
+.c-textarea{width:100%;background:var(--surface3);border:1px solid var(--border);border-radius:5px;padding:8px 10px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:12px;resize:none;outline:none;transition:border-color .15s;height:56px;line-height:1.5;}
+.c-textarea::placeholder{color:var(--text3);}
+.c-textarea:focus{border-color:var(--border2);}
+.ci-tools{display:flex;align-items:center;gap:6px;margin-top:6px;}
+.ci-tool{font-size:11px;color:var(--text3);cursor:pointer;padding:3px 7px;border-radius:3px;border:1px solid transparent;transition:all .12s;font-family:'DM Mono',monospace;background:transparent;}
+.ci-tool:hover{border-color:var(--border);color:var(--text2);}
+.post-btn{margin-left:auto;padding:4px 14px;background:var(--accent);border-radius:4px;font-size:11px;font-weight:600;color:#0a0a0c;cursor:pointer;transition:all .12s;border:none;font-family:'DM Sans',sans-serif;}
+.post-btn:hover{background:#d4eb00;}
+
+/* ══════════════════════════════
+   ARCHIVE OVERLAY
+══════════════════════════════ */
+.archive-overlay{position:fixed;inset:0;background:rgba(0,0,0,.8);backdrop-filter:blur(6px);z-index:200;display:flex;flex-direction:column;opacity:0;pointer-events:none;transition:opacity .2s;}
+.archive-overlay.open{opacity:1;pointer-events:auto;}
+.archive-topbar{display:flex;align-items:center;gap:16px;padding:0 28px;height:56px;border-bottom:1px solid var(--border);background:var(--surface);flex-shrink:0;}
+.archive-title{font-family:'Syne',sans-serif;font-weight:700;font-size:16px;color:var(--text);}
+.archive-sub{font-family:'DM Mono',monospace;font-size:11px;color:var(--text3);letter-spacing:.3px;}
+.archive-close{margin-left:auto;width:32px;height:32px;border-radius:6px;background:var(--surface3);border:1px solid var(--border2);color:var(--text2);font-size:18px;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .12s;line-height:1;}
+.archive-close:hover{border-color:var(--accent3);color:var(--accent3);}
+.archive-body{flex:1;overflow-y:auto;padding:28px;}
+.archive-body::-webkit-scrollbar{width:4px;}
+.archive-body::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px;}
+
+/* Date group */
+.date-group{margin-bottom:36px;}
+.date-heading{display:flex;align-items:center;gap:14px;margin-bottom:16px;}
+.date-label{font-family:'Syne',sans-serif;font-size:15px;font-weight:700;color:var(--text);}
+.date-sub{font-family:'DM Mono',monospace;font-size:10px;color:var(--text3);letter-spacing:.5px;}
+.date-line{flex:1;height:1px;background:var(--border);}
+.date-count{font-family:'DM Mono',monospace;font-size:10px;color:var(--text3);letter-spacing:.5px;}
+
+/* Archive grid */
+.archive-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:10px;}
+.archive-card{border-radius:8px;border:1px solid var(--border);background:var(--surface2);overflow:hidden;cursor:pointer;transition:all .15s;position:relative;}
+.archive-card:hover{border-color:var(--border2);transform:translateY(-2px);box-shadow:0 8px 24px rgba(0,0,0,.4);}
+.archive-card.locked-card{opacity:.4;cursor:not-allowed;}
+.archive-card.locked-card:hover{transform:none;box-shadow:none;}
+.ac-thumb{width:100%;aspect-ratio:16/9;position:relative;overflow:hidden;}
+.ac-thumb canvas{width:100%;height:100%;display:block;}
+.ac-lock{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.55);font-size:18px;}
+/* visibility stripe */
+.ac-vis-stripe{position:absolute;top:0;left:0;right:0;height:3px;}
+.stripe-public{background:#6dff6d;} .stripe-restricted{background:var(--accent2);} .stripe-private{background:var(--accent3);}
+.ac-info{padding:8px 10px;}
+.ac-name{font-size:11px;font-weight:500;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:4px;}
+.ac-meta{display:flex;align-items:center;gap:6px;}
+.ac-type{font-family:'DM Mono',monospace;font-size:9px;color:var(--text3);text-transform:uppercase;letter-spacing:.5px;}
+.ac-notes{font-family:'DM Mono',monospace;font-size:9px;color:var(--text3);}
+.ac-status{margin-left:auto;width:5px;height:5px;border-radius:50%;}
+.ac-badge-you{position:absolute;top:6px;right:6px;font-family:'DM Mono',monospace;font-size:8px;background:rgba(0,0,0,.6);color:rgba(255,255,255,.4);padding:1px 5px;border-radius:3px;letter-spacing:.3px;}
+/* artist row */
+.ac-artist{display:flex;align-items:center;gap:5px;margin-top:5px;}
+.ac-av{width:14px;height:14px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:7px;font-weight:700;flex-shrink:0;}
+.ac-artist-name{font-size:10px;color:var(--text3);}
+/* artist filter bar */
+.archive-filters{display:flex;align-items:center;gap:6px;padding:9px 28px;border-bottom:1px solid var(--border);background:var(--surface);flex-shrink:0;}
+.af-label{font-family:'DM Mono',monospace;font-size:10px;color:var(--text3);letter-spacing:.4px;margin-right:2px;}
+.af-chip{display:flex;align-items:center;gap:5px;padding:3px 11px;border-radius:20px;border:1px solid var(--border);font-size:11px;cursor:pointer;transition:all .12s;color:var(--text2);font-family:'DM Sans',sans-serif;}
+.af-chip:hover{border-color:var(--border2);color:var(--text);}
+.af-chip.active{border-color:var(--accent);color:var(--accent);background:rgba(232,255,71,.06);}
+.af-chip .af-av{width:16px;height:16px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:7px;font-weight:700;flex-shrink:0;}
+/* artist sub-header within a day */
+.artist-subgroup{margin-bottom:18px;}
+.artist-subgroup:last-child{margin-bottom:0;}
+.artist-subhd{display:flex;align-items:center;gap:9px;margin-bottom:10px;}
+.asub-av{width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;flex-shrink:0;border:2px solid transparent;}
+.asub-av.you{border-color:var(--accent);}
+.asub-name{font-family:'Syne',sans-serif;font-weight:700;font-size:13px;color:var(--text);}
+.asub-you{font-family:'DM Mono',monospace;font-size:9px;color:var(--accent);background:rgba(232,255,71,.08);border:1px solid rgba(232,255,71,.2);border-radius:3px;padding:1px 6px;letter-spacing:.4px;}
+.asub-count{font-family:'DM Mono',monospace;font-size:10px;color:var(--text3);margin-left:2px;}
+.asub-line{flex:1;height:1px;background:var(--border);opacity:.5;}
+/* New daily thread button */
+.new-thread-btn{display:flex;align-items:center;gap:8px;padding:10px 16px;border-radius:8px;border:1px dashed var(--border2);background:transparent;color:var(--text3);cursor:pointer;font-family:'DM Mono',monospace;font-size:11px;transition:all .15s;letter-spacing:.3px;width:100%;margin-bottom:16px;}
+.new-thread-btn:hover{border-color:var(--accent);color:var(--accent);}
+
+/* ══════════════════════════════
+   VIS MODAL
+══════════════════════════════ */
+.modal-backdrop{position:fixed;inset:0;background:rgba(0,0,0,.7);backdrop-filter:blur(4px);z-index:300;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .2s;}
+.modal-backdrop.open{opacity:1;pointer-events:auto;}
+.modal{background:var(--surface);border:1px solid var(--border2);border-radius:12px;width:460px;max-width:95vw;box-shadow:0 32px 80px rgba(0,0,0,.8);transform:translateY(8px) scale(.98);transition:transform .2s;overflow:hidden;}
+.modal-backdrop.open .modal{transform:none;}
+.modal-hd{padding:20px 22px 0;display:flex;align-items:flex-start;justify-content:space-between;}
+.modal-title{font-family:'Syne',sans-serif;font-size:15px;font-weight:700;color:var(--text);}
+.modal-sub{font-family:'DM Mono',monospace;font-size:10px;color:var(--text3);margin-top:3px;letter-spacing:.3px;}
+.modal-x{width:28px;height:28px;border-radius:6px;background:var(--surface3);border:1px solid var(--border);color:var(--text2);font-size:16px;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .12s;line-height:1;}
+.modal-x:hover{border-color:var(--accent3);color:var(--accent3);}
+.vis-opts{display:flex;flex-direction:column;gap:7px;padding:16px 22px;}
+.vo{border:1.5px solid var(--border);border-radius:8px;padding:13px 14px;cursor:pointer;transition:all .15s;display:flex;align-items:flex-start;gap:12px;}
+.vo:hover{border-color:var(--border2);background:var(--surface2);}
+.vo.s-pub{border-color:var(--accent);background:rgba(232,255,71,.04);}
+.vo.s-res{border-color:var(--accent2);background:rgba(123,97,255,.06);}
+.vo.s-prv{border-color:var(--accent3);background:rgba(255,107,107,.06);}
+.vo-ic{font-size:18px;flex-shrink:0;width:36px;height:36px;border-radius:8px;display:flex;align-items:center;justify-content:center;}
+.ic-pub{background:rgba(109,255,109,.1);} .ic-res{background:rgba(123,97,255,.1);} .ic-prv{background:rgba(255,107,107,.1);}
+.vo-bd{flex:1;}
+.vo-tt{font-family:'Syne',sans-serif;font-size:12px;font-weight:600;color:var(--text);margin-bottom:2px;}
+.vo-ds{font-size:11px;color:var(--text3);line-height:1.5;}
+.vo-ck{width:17px;height:17px;border-radius:50%;border:2px solid var(--border2);flex-shrink:0;margin-top:2px;transition:all .15s;display:flex;align-items:center;justify-content:center;font-size:9px;}
+.s-pub .vo-ck{border-color:var(--accent);background:var(--accent);color:#0a0a0c;}
+.s-res .vo-ck{border-color:var(--accent2);background:var(--accent2);color:#fff;}
+.s-prv .vo-ck{border-color:var(--accent3);background:var(--accent3);color:#fff;}
+.pp{padding:0 22px 14px;display:none;}
+.pp.vis{display:block;}
+.pp-lbl{font-family:'DM Mono',monospace;font-size:10px;color:var(--text3);letter-spacing:.5px;text-transform:uppercase;margin-bottom:8px;}
+.people-grid{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px;}
+.pchip{display:flex;align-items:center;gap:6px;padding:5px 10px 5px 6px;border-radius:20px;border:1.5px solid var(--border);background:var(--surface3);cursor:pointer;transition:all .12s;font-size:11px;color:var(--text2);user-select:none;}
+.pchip:hover{border-color:var(--border2);color:var(--text);}
+.pchip.on{border-color:var(--accent2);background:rgba(123,97,255,.1);color:var(--text);}
+.pchip.on .pc-av{border-color:var(--accent2);}
+.pc-av{width:20px;height:20px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:8px;font-weight:700;border:1.5px solid transparent;flex-shrink:0;}
+.pck{width:14px;height:14px;border-radius:50%;border:1.5px solid var(--border2);display:flex;align-items:center;justify-content:center;font-size:9px;transition:all .12s;flex-shrink:0;}
+.pchip.on .pck{background:var(--accent2);border-color:var(--accent2);color:#fff;}
+.prole{font-family:'DM Mono',monospace;font-size:9px;padding:2px 6px;border-radius:3px;cursor:pointer;border:1px solid var(--border);background:var(--surface2);color:var(--text3);transition:all .12s;display:none;outline:none;-webkit-appearance:none;}
+.pchip.on .prole{display:inline-block;}
+.prole.r-c{color:var(--accent2);border-color:rgba(123,97,255,.3);background:rgba(123,97,255,.1);}
+.prole.r-a{color:var(--accent);border-color:rgba(232,255,71,.3);background:rgba(232,255,71,.08);}
+.ext-inp{width:100%;background:var(--surface3);border:1px solid var(--border);border-radius:5px;padding:7px 10px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:12px;outline:none;transition:border-color .15s;}
+.ext-inp:focus{border-color:var(--border2);}
+.ext-inp::placeholder{color:var(--text3);}
+.ext-hint{font-size:10px;color:var(--text3);margin-top:4px;font-family:'DM Mono',monospace;}
+.modal-ft{padding:12px 22px;border-top:1px solid var(--border);display:flex;align-items:center;gap:10px;background:var(--surface2);}
+.mf-info{font-size:11px;color:var(--text3);flex:1;font-family:'DM Mono',monospace;}
+.mf-cancel{padding:6px 16px;border-radius:5px;border:1px solid var(--border2);background:transparent;color:var(--text2);font-family:'DM Sans',sans-serif;font-size:12px;cursor:pointer;transition:all .12s;}
+.mf-cancel:hover{border-color:var(--text2);color:var(--text);}
+.mf-save{padding:6px 20px;border-radius:5px;border:none;background:var(--accent);color:#0a0a0c;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:600;cursor:pointer;transition:all .12s;}
+.mf-save:hover{background:#d4eb00;}
+
+/* LOCKED MODAL */
+.locked-modal{background:var(--surface);border:1px solid rgba(255,107,107,.3);border-radius:12px;width:320px;padding:32px;text-align:center;box-shadow:0 32px 80px rgba(0,0,0,.8);transform:translateY(8px) scale(.98);transition:transform .2s;}
+.modal-backdrop.open .locked-modal{transform:none;}
+.lk-icon{font-size:40px;margin-bottom:14px;}
+.lk-title{font-family:'Syne',sans-serif;font-size:15px;font-weight:700;color:var(--text);margin-bottom:8px;}
+.lk-desc{font-size:12px;color:var(--text3);line-height:1.7;margin-bottom:20px;white-space:pre-line;}
+.lk-btn{padding:7px 22px;border-radius:5px;background:var(--surface3);border:1px solid var(--border2);color:var(--text2);font-size:12px;cursor:pointer;font-family:'DM Sans',sans-serif;transition:all .12s;}
+.lk-btn:hover{border-color:var(--text2);color:var(--text);}
+
+/* ══════════════════════════════════════════
+   TEAM VIEW OVERLAY
+══════════════════════════════════════════ */
+.team-overlay{position:fixed;inset:0;z-index:300;background:var(--bg);display:flex;flex-direction:column;opacity:0;pointer-events:none;transition:opacity .22s;}
+.team-overlay.open{opacity:1;pointer-events:all;}
+
+.team-topbar{height:54px;border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 24px;gap:16px;flex-shrink:0;background:var(--surface);}
+.team-title{font-family:'Syne',sans-serif;font-weight:800;font-size:16px;color:var(--text);letter-spacing:-.3px;}
+.team-title span{color:var(--text3);font-weight:400;font-size:12px;margin-left:6px;}
+.team-date-badge{font-family:'DM Mono',monospace;font-size:10px;color:var(--text2);background:var(--surface3);border:1px solid var(--border2);border-radius:4px;padding:3px 10px;letter-spacing:.4px;}
+.team-close{margin-left:auto;width:30px;height:30px;border-radius:5px;background:transparent;border:1px solid var(--border);color:var(--text2);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .14s;}
+.team-close:hover{border-color:var(--accent3);color:var(--accent3);}
+
+/* Filter row */
+.team-filters{padding:10px 24px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px;flex-shrink:0;background:var(--surface);}
+.tf-label{font-family:'DM Mono',monospace;font-size:10px;color:var(--text3);letter-spacing:.4px;margin-right:4px;}
+.tf-chip{padding:3px 11px;border-radius:20px;font-size:11px;font-family:'DM Mono',monospace;border:1px solid var(--border);color:var(--text2);cursor:pointer;transition:all .12s;background:transparent;}
+.tf-chip:hover{border-color:var(--border2);color:var(--text);}
+.tf-chip.active{background:rgba(232,255,71,.08);border-color:rgba(232,255,71,.3);color:var(--accent);}
+.tf-spacer{flex:1;}
+.tf-stat{font-family:'DM Mono',monospace;font-size:10px;color:var(--text3);}
+.tf-stat span{color:var(--text2);}
+
+/* Swimlanes scroll area */
+.team-scroll{flex:1;overflow-x:auto;overflow-y:hidden;display:flex;padding:20px 24px;gap:16px;align-items:flex-start;}
+.team-scroll::-webkit-scrollbar{height:4px;}
+.team-scroll::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px;}
+
+/* Artist lane */
+.artist-lane{flex-shrink:0;width:220px;display:flex;flex-direction:column;gap:0;}
+.lane-header{display:flex;align-items:center;gap:9px;padding:0 2px 10px;border-bottom:1px solid var(--border);margin-bottom:10px;}
+.lane-av{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0;position:relative;border:2px solid transparent;}
+.lane-av.you{border-color:var(--accent);}
+.lane-av .live-dot{position:absolute;bottom:-1px;right:-1px;width:8px;height:8px;border-radius:50%;border:1.5px solid var(--surface);z-index:2;}
+.lane-name{font-family:'Syne',sans-serif;font-weight:700;font-size:13px;color:var(--text);}
+.lane-count{font-family:'DM Mono',monospace;font-size:9px;color:var(--text3);margin-top:1px;}
+.lane-you-tag{font-family:'DM Mono',monospace;font-size:8px;color:var(--accent);letter-spacing:.5px;background:rgba(232,255,71,.08);border:1px solid rgba(232,255,71,.2);border-radius:3px;padding:1px 5px;}
+
+/* Cards in lane */
+.lane-card{border-radius:7px;border:1.5px solid var(--border);background:var(--surface2);overflow:hidden;margin-bottom:8px;cursor:pointer;transition:all .15s;}
+.lane-card:hover{border-color:var(--border2);background:var(--surface3);transform:translateY(-2px);box-shadow:0 8px 24px rgba(0,0,0,.4);}
+.lane-card.focused{border-color:var(--accent);box-shadow:0 0 0 1px rgba(232,255,71,.15),0 8px 24px rgba(0,0,0,.4);}
+.lane-card canvas{width:100%;display:block;}
+.lane-card-info{padding:7px 9px 8px;}
+.lci-name{font-size:11px;font-weight:500;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:4px;}
+.lci-meta{display:flex;align-items:center;gap:5px;font-family:'DM Mono',monospace;font-size:9px;color:var(--text3);}
+.lci-type{background:var(--surface3);border:1px solid var(--border);border-radius:2px;padding:1px 4px;color:var(--text2);}
+.lci-notes{display:flex;align-items:center;gap:3px;}
+.lci-notes svg{opacity:.6;}
+.lci-status{margin-left:auto;width:6px;height:6px;border-radius:50%;flex-shrink:0;}
+.lci-vis{width:5px;height:5px;border-radius:50%;flex-shrink:0;}
+
+/* Empty lane state */
+.lane-empty{border:1px dashed var(--border);border-radius:7px;padding:24px 12px;text-align:center;}
+.lane-empty-icon{font-size:22px;margin-bottom:8px;opacity:.4;}
+.lane-empty-txt{font-size:11px;color:var(--text3);line-height:1.6;}
+
+/* Focused artist highlight */
+.artist-lane.dimmed{opacity:.35;transition:opacity .2s;}
+.artist-lane.focused{opacity:1;}
+
+/* TOAST */
+.toast{position:fixed;bottom:100px;left:50%;transform:translateX(-50%) translateY(12px);background:var(--surface3);border:1px solid var(--border2);border-radius:8px;padding:9px 18px;font-size:12px;color:var(--text);font-family:'DM Mono',monospace;letter-spacing:.3px;z-index:400;opacity:0;transition:all .25s;pointer-events:none;display:flex;align-items:center;gap:8px;box-shadow:0 8px 24px rgba(0,0,0,.5);white-space:nowrap;}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+.tdot{width:7px;height:7px;border-radius:50%;flex-shrink:0;}
+
+/* ══════════════════════════════════════════
+   DEEP DIVE OVERLAY
+══════════════════════════════════════════ */
+.dive-overlay{position:fixed;inset:0;z-index:310;background:var(--bg);display:flex;flex-direction:column;opacity:0;pointer-events:none;transition:opacity .2s;}
+.dive-overlay.open{opacity:1;pointer-events:all;}
+.dive-topbar{height:54px;border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 20px;gap:0;flex-shrink:0;background:var(--surface);}
+.dive-back{display:flex;align-items:center;gap:7px;font-family:'DM Mono',monospace;font-size:11px;color:var(--text2);cursor:pointer;transition:color .14s;padding:5px 12px 5px 0;margin-right:14px;border-right:1px solid var(--border);}
+.dive-back:hover{color:var(--accent);}
+.dive-artist-av{width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0;border:2px solid var(--border2);margin-right:10px;}
+.dive-who{font-family:'Syne',sans-serif;font-weight:700;font-size:14px;color:var(--text);}
+.dive-channel{font-family:'DM Mono',monospace;font-size:10px;color:var(--text3);margin-left:8px;padding:2px 8px;border:1px solid var(--border);border-radius:3px;letter-spacing:.4px;}
+.dive-stats{font-family:'DM Mono',monospace;font-size:10px;color:var(--text3);margin-left:14px;padding-left:14px;border-left:1px solid var(--border);}
+.dive-stats span{color:var(--text2);}
+.dive-switcher{display:flex;align-items:center;gap:5px;margin-left:auto;margin-right:10px;}
+.ds-pill{display:flex;align-items:center;gap:5px;padding:3px 9px;border-radius:20px;border:1px solid var(--border);font-size:11px;cursor:pointer;transition:all .14s;font-family:'DM Sans',sans-serif;color:var(--text2);}
+.ds-pill:hover{border-color:var(--border2);color:var(--text);}
+.ds-pill.active{border-color:var(--accent);color:var(--accent);background:rgba(232,255,71,.06);}
+.ds-pill .ds-av{width:14px;height:14px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:6px;font-weight:700;flex-shrink:0;}
+.dive-close{width:28px;height:28px;border-radius:5px;background:transparent;border:1px solid var(--border);color:var(--text2);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .14s;flex-shrink:0;}
+.dive-close:hover{border-color:var(--accent3);color:var(--accent3);}
+.dive-filters{padding:8px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:6px;flex-shrink:0;background:var(--surface);}
+.dive-filter-label{font-family:'DM Mono',monospace;font-size:10px;color:var(--text3);letter-spacing:.4px;margin-right:2px;}
+.df-chip{padding:2px 10px;border-radius:20px;font-size:11px;font-family:'DM Mono',monospace;border:1px solid var(--border);color:var(--text2);cursor:pointer;transition:all .12s;}
+.df-chip:hover{border-color:var(--border2);color:var(--text);}
+.df-chip.active{background:rgba(232,255,71,.08);border-color:rgba(232,255,71,.3);color:var(--accent);}
+.dive-view-toggle{margin-left:auto;display:flex;gap:2px;background:var(--surface3);border:1px solid var(--border);border-radius:5px;padding:2px;}
+.dvt-btn{width:26px;height:24px;border-radius:3px;display:flex;align-items:center;justify-content:center;cursor:pointer;border:none;background:transparent;color:var(--text3);transition:all .12s;}
+.dvt-btn:hover{color:var(--text2);}
+.dvt-btn.active{background:var(--surface);color:var(--text);box-shadow:0 1px 3px rgba(0,0,0,.3);}
+.dive-body{flex:1;overflow-y:auto;padding:20px 20px 40px;}
+.dive-body::-webkit-scrollbar{width:4px;}
+.dive-body::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px;}
+.dive-day-section{margin-bottom:32px;}
+.dive-day-header{display:flex;align-items:center;gap:12px;margin-bottom:12px;position:sticky;top:-1px;background:var(--bg);padding:6px 0;z-index:5;}
+.ddh-date{font-family:'Syne',sans-serif;font-weight:700;font-size:13px;color:var(--text);}
+.ddh-rel{font-family:'DM Mono',monospace;font-size:10px;color:var(--text3);letter-spacing:.4px;}
+.ddh-line{flex:1;height:1px;background:var(--border);}
+.ddh-count{font-family:'DM Mono',monospace;font-size:10px;color:var(--text3);}
+.ddh-today-tag{background:rgba(232,255,71,.08);border:1px solid rgba(232,255,71,.2);color:var(--accent);border-radius:4px;padding:1px 7px;font-family:'DM Mono',monospace;font-size:9px;letter-spacing:.4px;}
+.dive-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(178px,1fr));gap:9px;}
+.dive-grid.dense{grid-template-columns:repeat(auto-fill,minmax(124px,1fr));gap:6px;}
+.dive-grid.strip{grid-template-columns:1fr;gap:5px;}
+.dive-card{border-radius:7px;border:1.5px solid var(--border);background:var(--surface2);overflow:hidden;cursor:pointer;transition:all .16s;position:relative;}
+.dive-card:hover{border-color:var(--border2);transform:translateY(-2px);box-shadow:0 10px 28px rgba(0,0,0,.5);}
+.dive-card:hover .dc-play{opacity:1;}
+.dive-card canvas{width:100%;display:block;}
+.dc-play{position:absolute;top:0;left:0;right:0;bottom:40px;display:flex;align-items:center;justify-content:center;opacity:0;transition:opacity .15s;background:rgba(0,0,0,.22);}
+.dc-play-btn{width:32px;height:32px;border-radius:50%;background:rgba(232,255,71,.9);display:flex;align-items:center;justify-content:center;}
+.dive-card-info{padding:6px 9px 8px;}
+.dci-row1{display:flex;align-items:center;gap:5px;margin-bottom:3px;}
+.dci-artist-av{width:14px;height:14px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:6px;font-weight:700;flex-shrink:0;}
+.dci-name{font-size:11px;font-weight:500;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;flex:1;}
+.dci-meta{display:flex;align-items:center;gap:5px;font-family:'DM Mono',monospace;font-size:9px;color:var(--text3);}
+.dci-type{background:var(--surface3);border:1px solid var(--border);border-radius:2px;padding:1px 4px;color:var(--text2);}
+.dci-notes{display:flex;align-items:center;gap:2px;}
+.dci-pip{width:5px;height:5px;border-radius:50%;flex-shrink:0;}
+.dive-grid.strip .dive-card{display:flex;align-items:stretch;}
+.dive-grid.strip .dive-card canvas{width:112px;height:63px;flex-shrink:0;border-radius:0;}
+.dive-grid.strip .dc-play{right:calc(100% - 112px);bottom:0;}
+.dive-grid.strip .dive-card-info{flex:1;display:flex;align-items:center;padding:0 12px;gap:10px;}
+.dive-grid.strip .dci-row1{flex:1;margin-bottom:0;}
+.dive-grid.strip .dci-meta{margin-left:auto;flex-shrink:0;gap:8px;}
+
+/* ══════════════════════════════════════════
+   ROLE SELECTOR OVERLAY
+══════════════════════════════════════════ */
+.role-screen{position:fixed;inset:0;z-index:500;background:var(--bg);display:flex;align-items:center;justify-content:center;flex-direction:column;transition:opacity .3s;}
+.role-screen.hidden{opacity:0;pointer-events:none;}
+.rs-bg{position:absolute;inset:0;background:radial-gradient(ellipse 70% 55% at 50% 0%,rgba(123,97,255,.1) 0%,transparent 65%),radial-gradient(ellipse 40% 40% at 85% 85%,rgba(232,255,71,.04) 0%,transparent 60%);pointer-events:none;}
+.rs-logo{font-family:'Syne',sans-serif;font-weight:800;font-size:32px;color:var(--accent);letter-spacing:-.5px;margin-bottom:6px;position:relative;}
+.rs-sub{font-family:'DM Mono',monospace;font-size:12px;color:var(--text3);letter-spacing:.3px;margin-bottom:40px;position:relative;}
+.rs-hint{font-family:'DM Mono',monospace;font-size:10px;color:var(--text3);margin-top:20px;position:relative;letter-spacing:.3px;}
+.signin-card{position:relative;background:var(--surface);border:1px solid var(--border2);border-radius:12px;padding:32px 40px;display:flex;flex-direction:column;align-items:center;gap:0;box-shadow:0 24px 64px rgba(0,0,0,.5);}
+.google-btn{display:flex;align-items:center;gap:12px;padding:12px 24px;border-radius:8px;border:1px solid var(--border2);background:var(--surface2);color:var(--text);font-family:'DM Sans',sans-serif;font-size:14px;font-weight:500;cursor:pointer;transition:all .18s;white-space:nowrap;}
+.google-btn:hover{border-color:var(--border2);background:var(--surface3);transform:translateY(-1px);box-shadow:0 8px 24px rgba(0,0,0,.3);}
+
+/* ── SETUP OVERLAY ── */
+.setup-overlay{position:fixed;inset:0;z-index:500;display:flex;background:var(--bg);opacity:0;pointer-events:none;transition:opacity .3s;}
+.setup-overlay.open{opacity:1;pointer-events:all;}
+/* Fake Slack sidebar */
+.slack-sidebar{width:220px;flex-shrink:0;background:#1a1124;border-right:1px solid rgba(255,255,255,.06);display:flex;flex-direction:column;}
+.sls-header{padding:13px 16px;border-bottom:1px solid rgba(255,255,255,.06);display:flex;align-items:center;gap:9px;}
+.sls-av{width:26px;height:26px;border-radius:6px;background:linear-gradient(135deg,#4a154b,#7b61ff);display:flex;align-items:center;justify-content:center;font-family:'Syne',sans-serif;font-weight:800;font-size:12px;}
+.sls-name{font-family:'Syne',sans-serif;font-weight:700;font-size:13px;color:rgba(255,255,255,.9);}
+.sls-chlist{flex:1;padding:10px 6px;}
+.sls-label{font-family:'DM Mono',monospace;font-size:9px;color:rgba(255,255,255,.28);letter-spacing:.8px;text-transform:uppercase;padding:0 8px 6px;}
+.sls-ch{display:flex;align-items:center;gap:6px;padding:4px 8px;border-radius:4px;font-size:12px;color:rgba(255,255,255,.45);cursor:pointer;transition:all .1s;}
+.sls-ch:hover{background:rgba(255,255,255,.07);color:rgba(255,255,255,.75);}
+.sls-ch.active{background:rgba(255,255,255,.12);color:#fff;}
+.sls-ch .sh{opacity:.35;font-size:13px;}
+.sls-dot{width:6px;height:6px;border-radius:50%;background:var(--accent);margin-left:auto;flex-shrink:0;}
+.sls-new-badge{margin-left:auto;font-family:'DM Mono',monospace;font-size:8px;background:var(--accent2);color:#fff;border-radius:3px;padding:1px 4px;}
+/* Setup main area */
+.setup-main{flex:1;display:flex;flex-direction:column;}
+.setup-bar{height:48px;display:flex;align-items:center;padding:0 20px;gap:10px;border-bottom:1px solid var(--border);background:var(--surface);flex-shrink:0;}
+.setup-ch-name{font-weight:600;font-size:14px;display:flex;align-items:center;gap:7px;}
+.setup-body{flex:1;overflow-y:auto;display:flex;align-items:flex-start;justify-content:center;padding:40px 24px;}
+/* Setup prompt card */
+.spc{width:100%;max-width:520px;background:var(--surface);border:1px solid var(--border2);border-radius:14px;overflow:hidden;box-shadow:0 24px 64px rgba(0,0,0,.5);animation:spcIn .35s cubic-bezier(.16,1,.3,1) both;}
+@keyframes spcIn{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:none}}
+.spc-hd{padding:20px 22px 16px;border-bottom:1px solid var(--border);display:flex;align-items:flex-start;gap:13px;}
+.spc-ico{font-size:30px;flex-shrink:0;}
+.spc-title{font-family:'Syne',sans-serif;font-weight:700;font-size:15px;margin-bottom:3px;}
+.spc-desc{font-size:12px;color:var(--text2);line-height:1.6;}
+.spc-body{padding:18px 22px;}
+.spc-q{font-family:'Syne',sans-serif;font-weight:600;font-size:14px;margin-bottom:14px;}
+/* Yes / No */
+.yn-row{display:flex;gap:10px;}
+.yn-btn{flex:1;padding:13px 12px;border-radius:8px;border:1.5px solid var(--border2);background:var(--surface2);cursor:pointer;transition:all .18s;text-align:center;}
+.yn-btn:hover{transform:translateY(-2px);}
+.yn-btn.yes:hover,.yn-btn.yes.sel{border-color:var(--accent);background:rgba(232,255,71,.05);}
+.yn-btn.no:hover{border-color:var(--border2);background:var(--surface3);}
+.yn-icon{font-size:20px;margin-bottom:5px;}
+.yn-label{font-family:'Syne',sans-serif;font-weight:700;font-size:13px;margin-bottom:3px;}
+.yn-desc{font-size:11px;color:var(--text3);}
+/* Config section */
+.spc-config{display:none;padding:0 22px 22px;}
+.spc-config.vis{display:block;animation:spcIn .3s cubic-bezier(.16,1,.3,1) both;}
+.spc-divider{height:1px;background:var(--border);margin:0 -22px 18px;}
+.spc-lbl{font-family:'DM Mono',monospace;font-size:10px;color:var(--text3);letter-spacing:.6px;text-transform:uppercase;margin-bottom:9px;}
+.spc-input{width:100%;background:var(--surface2);border:1px solid var(--border2);border-radius:6px;padding:9px 12px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px;outline:none;transition:border-color .15s;margin-bottom:16px;}
+.spc-input:focus{border-color:var(--accent2);}
+.spc-input::placeholder{color:var(--text3);}
+/* Role assignment */
+.role-assign-list{margin-bottom:16px;}
+.ra-row{display:flex;align-items:center;gap:9px;padding:8px 10px;border-radius:7px;background:var(--surface2);border:1px solid var(--border);margin-bottom:7px;}
+.ra-av{width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;flex-shrink:0;}
+.ra-name{flex:1;font-size:12px;font-weight:500;}
+.ra-role-sel{appearance:none;-webkit-appearance:none;padding:4px 22px 4px 9px;border-radius:4px;border:1px solid var(--border2);background:var(--surface3);color:var(--text2);font-family:'DM Mono',monospace;font-size:10px;cursor:pointer;outline:none;background-image:url("data:image/svg+xml,%3Csvg width='8' height='5' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1l3 3 3-3' stroke='%23555568' fill='none' stroke-width='1.2' stroke-linecap='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 6px center;transition:border-color .15s;}
+.ra-role-sel:focus{border-color:var(--accent2);}
+/* Perm summary */
+.perm-summary{background:var(--surface2);border:1px solid var(--border);border-radius:7px;padding:12px;margin-bottom:16px;}
+.ps-row{display:flex;align-items:flex-start;gap:9px;padding:5px 0;border-bottom:1px solid var(--border);}
+.ps-row:last-child{border:none;padding-bottom:0;}
+.ps-badge{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:.4px;padding:2px 7px;border-radius:10px;flex-shrink:0;margin-top:1px;}
+.psb-admin{background:rgba(255,159,67,.1);border:1px solid rgba(255,159,67,.25);color:#ff9f43;}
+.psb-manager{background:rgba(232,255,71,.07);border:1px solid rgba(232,255,71,.2);color:var(--accent);}
+.psb-artist{background:rgba(97,200,255,.07);border:1px solid rgba(97,200,255,.2);color:#61c8ff;}
+.ps-text{font-size:11px;color:var(--text2);line-height:1.65;flex:1;}
+.ps-text strong{color:var(--text);font-weight:500;}
+.spc-create-btn{width:100%;padding:12px;background:var(--accent);color:#0a0a0c;border:none;border-radius:7px;font-family:'Syne',sans-serif;font-weight:700;font-size:14px;cursor:pointer;transition:all .15s;display:flex;align-items:center;justify-content:center;gap:7px;}
+.spc-create-btn:hover{background:#d4eb00;transform:translateY(-1px);box-shadow:0 8px 24px rgba(232,255,71,.2);}
+
+/* ── ROLE PILL in topbar ── */
+.role-pill{display:flex;align-items:center;gap:6px;padding:3px 10px;border-radius:20px;font-family:'DM Mono',monospace;font-size:10px;letter-spacing:.4px;margin-left:4px;}
+.role-pill.rp-admin{background:rgba(255,159,67,.1);border:1px solid rgba(255,159,67,.25);color:#ff9f43;}
+.role-pill.rp-manager{background:rgba(232,255,71,.07);border:1px solid rgba(232,255,71,.2);color:var(--accent);}
+.role-pill.rp-artist{background:rgba(97,200,255,.07);border:1px solid rgba(97,200,255,.2);color:#61c8ff;}
+.rp-dot{width:5px;height:5px;border-radius:50%;flex-shrink:0;}
+.rp-admin .rp-dot{background:#ff9f43;} .rp-manager .rp-dot{background:var(--accent);} .rp-artist .rp-dot{background:#61c8ff;}
+
+/* ── MANAGER APPROVE BAR ── */
+.approve-bar{display:flex;align-items:center;gap:8px;padding:6px 18px;border-bottom:1px solid var(--border);background:var(--surface);flex-shrink:0;}
+.ab-label{font-family:'DM Mono',monospace;font-size:10px;color:var(--text3);flex:1;letter-spacing:.3px;}
+.ab-approve{display:flex;align-items:center;gap:5px;padding:5px 14px;border-radius:5px;border:1px solid rgba(109,255,109,.3);background:rgba(109,255,109,.06);color:#6dff6d;font-family:'DM Mono',monospace;font-size:10px;cursor:pointer;transition:all .14s;letter-spacing:.3px;}
+.ab-approve:hover{background:rgba(109,255,109,.14);border-color:rgba(109,255,109,.5);}
+.ab-approve.active{background:rgba(109,255,109,.14);border-color:#6dff6d;}
+.ab-changes{display:flex;align-items:center;gap:5px;padding:5px 13px;border-radius:5px;border:1px solid rgba(255,107,107,.25);background:rgba(255,107,107,.05);color:var(--accent3);font-family:'DM Mono',monospace;font-size:10px;cursor:pointer;transition:all .14s;letter-spacing:.3px;}
+.ab-changes:hover{background:rgba(255,107,107,.12);border-color:rgba(255,107,107,.4);}
+.ab-changes.active{background:rgba(255,107,107,.12);border-color:var(--accent3);}
+.ab-download{display:flex;align-items:center;gap:5px;padding:5px 13px;border-radius:5px;border:1px solid var(--border2);background:var(--surface3);color:var(--text2);font-family:'DM Mono',monospace;font-size:10px;cursor:pointer;transition:all .14s;}
+.ab-download:hover{border-color:var(--accent);color:var(--accent);}
+/* Approval stamp on video */
+.approval-stamp{position:absolute;top:12px;right:14px;display:flex;align-items:center;gap:6px;padding:5px 12px;border-radius:5px;font-family:'DM Mono',monospace;font-size:11px;font-weight:700;pointer-events:none;opacity:0;transition:opacity .3s;}
+.approval-stamp.approved{background:rgba(109,255,109,.15);border:1px solid rgba(109,255,109,.4);color:#6dff6d;opacity:1;}
+.approval-stamp.changes{background:rgba(255,107,107,.12);border:1px solid rgba(255,107,107,.3);color:var(--accent3);opacity:1;}
+
+/* ── COMMENT LEAD BADGE ── */
+.ci-role-badge{font-family:'DM Mono',monospace;font-size:8px;letter-spacing:.4px;padding:1px 6px;border-radius:3px;flex-shrink:0;}
+.crb-admin{background:rgba(255,159,67,.1);border:1px solid rgba(255,159,67,.25);color:#ff9f43;}
+/* Manager sub-roles — all share the accent yellow, differentiated by label */
+.crb-manager{background:rgba(232,255,71,.07);border:1px solid rgba(232,255,71,.2);color:var(--accent);}
+/* lead-comment left border shared by all manager sub-roles */
+.citem.lead-comment{border-left:2px solid var(--accent);padding-left:10px;}
+.citem.admin-comment{border-left:2px solid #ff9f43;padding-left:10px;}
+
+/* ── PRIVATE ITEM (artist sees blur) ── */
+.thumb-item.hidden-private{opacity:.28;cursor:not-allowed;pointer-events:none;}
+/* For-review stripe colour */
+.vd-forreview{background:var(--accent);}
+.vis-pill.forreview{background:rgba(232,255,71,.08);border-color:rgba(232,255,71,.25);color:var(--accent);}
+.vis-pill.forreview .vp-dot{background:var(--accent);}
+/* Download hidden for artists */
+.dl-hidden{display:none!important;}
+
+/* ── REVIEW QUEUE BANNER ── */
+.review-queue-banner{margin:8px 8px 2px;background:rgba(232,255,71,.05);border:1px solid rgba(232,255,71,.18);border-radius:6px;padding:8px 10px;}
+.rqb-title{font-family:'DM Mono',monospace;font-size:9px;color:var(--accent);letter-spacing:.5px;text-transform:uppercase;margin-bottom:5px;display:flex;align-items:center;gap:5px;}
+.rqb-item{display:flex;align-items:center;gap:6px;padding:3px 0;cursor:pointer;}
+.rqb-item:hover .rqb-name{color:var(--accent);}
+.rqb-dot{width:5px;height:5px;border-radius:50%;background:var(--accent);flex-shrink:0;}
+.rqb-name{font-size:10px;color:var(--text2);transition:color .12s;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.rqb-who{font-family:'DM Mono',monospace;font-size:9px;color:var(--text3);margin-left:auto;flex-shrink:0;}
+
+/* Visibility cycling label for For Review */
+.forreview-tag{position:absolute;top:4px;left:4px;font-family:'DM Mono',monospace;font-size:7px;background:rgba(232,255,71,.9);color:#0a0a0c;padding:1px 5px;border-radius:2px;font-weight:700;letter-spacing:.3px;}
+</style>
+</head>
+<body>
+
+<!-- ══════════════════════════════════════════
+     ROLE SELECTOR SCREEN
+══════════════════════════════════════════ -->
+<div class="role-screen" id="roleScreen">
+  <div class="rs-bg"></div>
+  <div class="rs-logo">Dailies</div>
+  <div class="rs-sub">Daily work. Shared simply.</div>
+  <div class="signin-card">
+    <button class="google-btn" onclick="signIn()">
+      <svg width="18" height="18" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>
+      Continue with Google
+    </button>
+  </div>
+  <div class="rs-hint">You'll be taken to your boards after signing in</div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     SETUP OVERLAY (admin new-channel flow)
+══════════════════════════════════════════ -->
+<div class="setup-overlay" id="setupOverlay">
+  <!-- Slack sidebar -->
+  <div class="slack-sidebar">
+    <div class="sls-header">
+      <div class="sls-av">N</div>
+      <div class="sls-name">NUANCE_SWITCH</div>
+    </div>
+    <div class="sls-chlist">
+      <div class="sls-label">Channels</div>
+      <div class="sls-ch"><span class="sh">#</span> general <div class="sls-dot"></div></div>
+      <div class="sls-ch"><span class="sh">#</span> announcements</div>
+      <div class="sls-ch active"><span class="sh">#</span> nuance-switch <div class="sls-new-badge">NEW</div></div>
+      <div class="sls-ch"><span class="sh">#</span> crit <div class="sls-dot"></div></div>
+      <div class="sls-ch"><span class="sh">#</span> renders</div>
+      <div class="sls-ch"><span class="sh">#</span> references</div>
+    </div>
+  </div>
+
+  <!-- Setup main -->
+  <div class="setup-main">
+    <div class="setup-bar">
+      <div class="setup-ch-name">
+        <span style="opacity:.35;font-size:17px;">#</span> nuance-switch
+        <span style="font-size:10px;color:var(--text3);font-family:'DM Mono',monospace;padding:2px 7px;border:1px solid var(--border);border-radius:3px;letter-spacing:.4px;">NEW CHANNEL</span>
+      </div>
+    </div>
+    <div class="setup-body">
+      <div class="spc">
+        <!-- Header -->
+        <div class="spc-hd">
+          <div class="spc-ico">🎬</div>
+          <div>
+            <div class="spc-title">Set up a Dailies board?</div>
+            <div class="spc-desc">Give your team a dedicated space to post daily work, collect timecoded feedback, and track approvals — connected directly to this channel.</div>
+          </div>
+        </div>
+        <!-- Yes / No -->
+        <div class="spc-body">
+          <div class="spc-q">Create a Dailies board for <strong>#nuance-switch</strong>?</div>
+          <div class="yn-row">
+            <div class="yn-btn yes" id="ynYes" onclick="setupYes()">
+              <div class="yn-icon">✅</div>
+              <div class="yn-label">Yes, set it up</div>
+              <div class="yn-desc">Create a board and assign team roles</div>
+            </div>
+            <div class="yn-btn no" onclick="setupNo()">
+              <div class="yn-icon">✕</div>
+              <div class="yn-label">Not now</div>
+              <div class="yn-desc">Add one later from channel settings</div>
+            </div>
+          </div>
+        </div>
+        <!-- Config section (revealed on Yes) -->
+        <div class="spc-config" id="spcConfig">
+          <div class="spc-divider"></div>
+          <div class="spc-lbl">Board name</div>
+          <input class="spc-input" type="text" value="NUANCE_SWITCH Dailies" />
+          <div class="spc-lbl">Assign roles</div>
+          <div class="role-assign-list">
+            <div class="ra-row"><div class="ra-av ap1" style="background:#2d1b4e;color:#7b61ff;">JK</div><div class="ra-name">Jamie K <span style="color:var(--text3);font-size:10px;">(you)</span></div><select class="ra-role-sel"><option value="admin" selected>⚙ Admin</option><option value="manager">🎬 CD / AD</option><option value="artist">✏ Artist</option></select></div>
+            <div class="ra-row"><div class="ra-av ap2" style="background:#1b3a1b;color:#6dff6d;">MR</div><div class="ra-name">Marcus R</div><select class="ra-role-sel"><option value="admin">⚙ Admin</option><option value="manager" selected>🎬 CD / AD</option><option value="artist">✏ Artist</option></select></div>
+            <div class="ra-row"><div class="ra-av ap3" style="background:#3a1b1b;color:#ff6b6b;">AL</div><div class="ra-name">Aiko L</div><select class="ra-role-sel"><option value="admin">⚙ Admin</option><option value="manager">🎬 CD / AD</option><option value="artist" selected>✏ Artist</option></select></div>
+            <div class="ra-row"><div class="ra-av ap4" style="background:#1a2a3a;color:#61c8ff;">DC</div><div class="ra-name">Dev Chen</div><select class="ra-role-sel"><option value="admin">⚙ Admin</option><option value="manager">🎬 CD / AD</option><option value="artist" selected>✏ Artist</option></select></div>
+            <div class="ra-row"><div class="ra-av ap5" style="background:#2a2a1a;color:#ffcc44;">SM</div><div class="ra-name">Sara M</div><select class="ra-role-sel"><option value="admin">⚙ Admin</option><option value="manager">🎬 CD / AD</option><option value="artist" selected>✏ Artist</option></select></div>
+          </div>
+          <div class="spc-lbl">Permissions</div>
+          <div class="perm-summary">
+            <div class="ps-row"><div class="ps-badge psb-admin">ADMIN</div><div class="ps-text"><strong>Full visibility</strong> incl. Private · <strong>Upload</strong> · <strong>Download</strong> · <strong>Approve</strong> · Manage roles</div></div>
+            <div class="ps-row"><div class="ps-badge psb-manager">CD / AD</div><div class="ps-text"><strong>Full visibility</strong> incl. Private &amp; For Review · <strong>Upload</strong> own dailies · <strong>Download</strong> · <strong>Approve</strong> · Badged comments</div></div>
+            <div class="ps-row"><div class="ps-badge psb-artist">ARTIST</div><div class="ps-text">Sees all <strong>Team-visible</strong> work · <strong>Upload</strong> own dailies · <strong>Comment</strong> · No download · Private items hidden</div></div>
+          </div>
+          <button class="spc-create-btn" onclick="createBoard()">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20,6 9,17 4,12"/></svg>
+            Create Dailies Board
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- TOPBAR -->
+<div class="topbar" id="mainTopbar">
+
+  <!-- Logo — home link -->
+  <div class="logo" onclick="toast('Home — all your boards','#e8ff47')">Dailies</div>
+
+  <div class="topbar-sep"></div>
+
+  <!-- Board owner identity — whose daily we're viewing -->
+  <div class="board-identity">
+    <div class="board-owner-av ap3" style="background:#3a1b1b;color:#ff6b6b;">
+      AL
+      <div class="live-dot away"></div>
+    </div>
+    <div class="board-owner-text">
+      <div class="board-owner-name">Aiko L's Daily</div>
+      <div class="board-owner-sub">
+        <span class="board-channel-tag">#nuance-switch</span>
+        <span style="color:var(--border2);">·</span>
+        <span class="board-date-tag" id="topbarDate">THU 13 MAR</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="topbar-right">
+
+    <!-- Other board members -->
+    <div class="member-avatars">
+      <div class="avatar-p ap1" onclick="switchBoard('JK')" title="">JK
+        <div class="live-dot online"></div>
+        <div class="av-tip">
+          <div class="av-tip-name">Jamie K</div>
+          <div class="av-tip-status">● online — you</div>
+          <div class="av-tip-role" style="color:#ff9f43;">⚙ Admin</div>
+        </div>
+      </div>
+      <div class="avatar-p ap2" onclick="switchBoard('MR')">MR
+        <div class="live-dot online"></div>
+        <div class="av-tip">
+          <div class="av-tip-name">Marcus R</div>
+          <div class="av-tip-status">● online</div>
+          <div class="av-tip-role" style="color:var(--accent);">🎬 CD</div>
+          <div class="av-tip-count">4 uploads today</div>
+        </div>
+      </div>
+      <div class="avatar-p ap4" onclick="switchBoard('DC')">DC
+        <div class="live-dot online"></div>
+        <div class="av-tip">
+          <div class="av-tip-name">Dev Chen</div>
+          <div class="av-tip-status">● online</div>
+          <div class="av-tip-role" style="color:var(--accent);">🎬 TD</div>
+          <div class="av-tip-count">5 uploads today</div>
+        </div>
+      </div>
+      <div class="avatar-p ap5" onclick="switchBoard('SM')">SM
+        <div class="live-dot offline"></div>
+        <div class="av-tip">
+          <div class="av-tip-name">Sara M</div>
+          <div class="av-tip-status">○ offline</div>
+          <div class="av-tip-role" style="color:#61c8ff;">✏ Artist</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="member-sep"></div>
+
+    <button class="archive-btn" onclick="openArchive()">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="4" width="20" height="5" rx="1"/><path d="M4 9v10a1 1 0 001 1h14a1 1 0 001-1V9"/><path d="M10 13h4"/></svg>
+      Archive
+    </button>
+
+    <!-- Signed-in user — always far right -->
+    <div class="my-avatar ap1" style="background:#2d1b4e;color:#7b61ff;">JK
+      <div class="av-tip">
+        <div class="av-tip-name">Jamie K</div>
+        <div class="av-tip-status" style="color:#ff9f43;">⚙ Admin</div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<div class="main">
+
+  <!-- SIDEBAR: Today's uploads with thumbnails -->
+  <div class="sidebar">
+    <div class="sidebar-header">
+      <div>
+        <div class="today-label">Today's Daily</div>
+        <div class="today-date" id="todayDate">THU 5 MAR 2026</div>
+      </div>
+      <div class="add-btn" onclick="toast('Set visibility when uploading','#e8ff47')">+</div>
+    </div>
+
+    <div class="thumb-list" id="thumbList">
+
+      <!-- Each item: full-width thumbnail + text below -->
+      <div class="thumb-item active" id="ti-0" onclick="loadItem(0,event)">
+        <div class="thumb-img">
+          <canvas class="thumb-canvas" id="tc-0" width="200" height="113"></canvas>
+          <span class="thumb-type-badge">MOV</span>
+        </div>
+        <div class="thumb-info">
+          <div class="thumb-name">Brand_Ident_v04</div>
+          <div class="thumb-meta">
+            <span class="vis-dot-small vd-public" title="Team"></span>
+            <span class="thumb-count">5 notes</span>
+            <span class="status-pip sp-review"></span>
+          </div>
+        </div>
+      </div>
+
+      <div class="thumb-item vis-restricted" id="ti-1" onclick="loadItem(1,event)">
+        <div class="thumb-img">
+          <canvas class="thumb-canvas" id="tc-1" width="200" height="113"></canvas>
+          <span class="thumb-type-badge">MP4</span>
+        </div>
+        <div class="thumb-info">
+          <div class="thumb-name">Client_Pitch_v02</div>
+          <div class="thumb-meta">
+            <span class="vis-dot-small vd-restricted" title="Restricted"></span>
+            <span class="thumb-count">2 notes</span>
+            <span class="status-pip sp-new"></span>
+          </div>
+        </div>
+      </div>
+
+      <div class="thumb-item vis-private" id="ti-2" onclick="loadItem(2,event)">
+        <div class="thumb-img">
+          <canvas class="thumb-canvas" id="tc-2" width="200" height="113"></canvas>
+          <span class="thumb-type-badge">MOV</span>
+        </div>
+        <div class="thumb-info">
+          <div class="thumb-name">Directors_Cut_WIP</div>
+          <div class="thumb-meta">
+            <span class="vis-dot-small vd-private" title="Private"></span>
+            <span class="thumb-count">1 note</span>
+            <span class="status-pip sp-review"></span>
+          </div>
+        </div>
+      </div>
+
+      <div class="thumb-item locked" id="ti-3" onclick="showLocked('Styleframes_R3','Marcus R')">
+        <div class="thumb-img">
+          <canvas class="thumb-canvas" id="tc-3" width="200" height="113" style="filter:blur(4px);"></canvas>
+          <div class="thumb-overlay-lock">🔐</div>
+          <span class="thumb-type-badge">PSD</span>
+        </div>
+        <div class="thumb-info">
+          <div class="thumb-name" style="color:var(--text3);">Styleframes_R3</div>
+          <div class="thumb-meta">
+            <span class="vis-dot-small vd-restricted"></span>
+            <span class="thumb-count">restricted</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="thumb-item" id="ti-4" onclick="loadItem(4,event)">
+        <div class="thumb-img">
+          <canvas class="thumb-canvas" id="tc-4" width="200" height="113"></canvas>
+          <span class="thumb-type-badge">MP4</span>
+        </div>
+        <div class="thumb-info">
+          <div class="thumb-name">Particle_test_01</div>
+          <div class="thumb-meta">
+            <span class="vis-dot-small vd-public"></span>
+            <span class="thumb-count">8 notes</span>
+            <span class="status-pip sp-approved"></span>
+          </div>
+        </div>
+      </div>
+
+      <div class="thumb-item locked" id="ti-5" onclick="showLocked('Agency_Proposal','Aiko L')">
+        <div class="thumb-img">
+          <canvas class="thumb-canvas" id="tc-5" width="200" height="113" style="filter:blur(4px);"></canvas>
+          <div class="thumb-overlay-lock">🔐</div>
+          <span class="thumb-type-badge">MOV</span>
+        </div>
+        <div class="thumb-info">
+          <div class="thumb-name" style="color:var(--text3);">Agency_Proposal</div>
+          <div class="thumb-meta">
+            <span class="vis-dot-small vd-private"></span>
+            <span class="thumb-count">private</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="thumb-item" id="ti-6" onclick="loadItem(6,event)">
+        <div class="thumb-img">
+          <canvas class="thumb-canvas" id="tc-6" width="200" height="113"></canvas>
+          <span class="thumb-type-badge">EXR</span>
+        </div>
+        <div class="thumb-info">
+          <div class="thumb-name">CG_render_pass_v1</div>
+          <div class="thumb-meta">
+            <span class="vis-dot-small vd-public"></span>
+            <span class="thumb-count">1 note</span>
+            <span class="status-pip sp-new"></span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="sidebar-footer">
+      <div class="upload-area">
+        <div class="upload-text">Drop files or <strong>Browse</strong><br>to add to today's daily</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- VIEWER -->
+  <div class="viewer">
+    <div class="viewer-header">
+      <div class="viewer-title" id="viewerTitle">Brand_Ident_v04.mov</div>
+      <div class="vis-pill public" id="visPill" onclick="openVisModal()" title="Click to change visibility">
+        <span class="vp-dot"></span>
+        <span id="visPillLabel">🌐 Team</span>
+        <svg width="8" height="8" viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.5" style="margin-left:2px;opacity:.6"><path d="M1 3l4 4 4-4"/></svg>
+      </div>
+      <div class="viewer-actions">
+        <button class="dl-btn" id="dlBtn" onclick="toast('Downloading original file…','#e8ff47')">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7,10 12,15 17,10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          Download
+        </button>
+      </div>
+    </div>
+
+    <!-- Approve bar — visible only for managers/admin -->
+    <div class="approve-bar" id="approveBar" style="display:none;">
+      <div class="ab-label" id="approveBarLabel">Reviewing: Brand_Ident_v04.mov</div>
+      <button class="ab-approve" id="abApprove" onclick="toggleApprove()">
+        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20,6 9,17 4,12"/></svg>
+        Approve
+      </button>
+      <button class="ab-changes" id="abChanges" onclick="toggleChanges()">
+        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+        Request changes
+      </button>
+      <button class="ab-download" onclick="toast('Downloading original file…','#e8ff47')">
+        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7,10 12,15 17,10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        Download original
+      </button>
+    </div>
+
+    <div class="video-container">
+      <div class="video-mock">
+        <div class="video-frame" id="videoFrame" onclick="togglePlay()">
+          <canvas id="mainCanvas"></canvas>
+          <svg class="draw-overlay" id="drawOverlay" viewBox="0 0 960 540" preserveAspectRatio="none">
+            <path d="M 280 180 Q 320 160 350 190 Q 390 220 370 260 Q 350 295 310 290" fill="none" stroke="#ff6b6b" stroke-width="2.5" stroke-linecap="round" opacity=".7"/>
+            <path d="M 480 120 L 520 120 L 540 160 L 520 200 L 480 200 L 460 160 Z" fill="none" stroke="#7b61ff" stroke-width="2" stroke-linecap="round" opacity=".6"/>
+          </svg>
+          <div class="annotation-pin pin-r" style="left:27%;top:28%" onclick="selComment(1,event)"><span class="pn">1</span></div>
+          <div class="annotation-pin pin-p" style="left:48%;top:14%" onclick="selComment(2,event)"><span class="pn">2</span></div>
+          <div class="annotation-pin pin-y" style="left:62%;top:58%" onclick="selComment(3,event)"><span class="pn">3</span></div>
+          <div class="play-overlay" id="playOverlay">
+            <div class="play-big" onclick="togglePlay(event)">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="#0a0a0c"><polygon points="5,3 19,12 5,21"/></svg>
+            </div>
+          </div>
+          <!-- Approval stamp -->
+          <div class="approval-stamp" id="approvalStamp"></div>
+          <!-- Fullscreen button -->
+          <div class="fs-btn" id="fsBtn" onclick="toggleFullscreen(event)" title="Fullscreen">
+            <svg id="fsIcon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 3H5a2 2 0 00-2 2v3m18 0V5a2 2 0 00-2-2h-3m0 18h3a2 2 0 002-2v-3M3 16v3a2 2 0 002 2h3"/></svg>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="controls">
+      <div class="timeline-area">
+        <div class="timeline-track" id="timeline">
+          <canvas id="waveform"></canvas>
+          <div class="timeline-marker tm-r" style="left:12%"><div class="marker-tip">00:00:01:08 · Jamie K</div></div>
+          <div class="timeline-marker tm-r" style="left:28%"><div class="marker-tip">00:00:02:14 · Jamie K</div></div>
+          <div class="timeline-marker tm-p" style="left:45%"><div class="marker-tip">00:00:04:02 · Marcus R</div></div>
+          <div class="timeline-marker tm-y" style="left:67%"><div class="marker-tip">00:00:06:11 · Aiko L</div></div>
+          <div class="timeline-marker tm-p" style="left:80%"><div class="marker-tip">00:00:07:20 · Marcus R</div></div>
+          <div class="playhead" id="playhead"></div>
+        </div>
+      </div>
+      <div class="playback-row">
+        <button class="ctrl-btn" onclick="goStart()"><svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><rect x="4" y="4" width="3" height="16"/><polygon points="19,4 8,12 19,20"/></svg></button>
+        <button class="ctrl-btn" onclick="stepFrame(-1)"><svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><polygon points="15,4 4,12 15,20"/><polygon points="21,4 10,12 21,20"/></svg></button>
+        <button class="ctrl-play" id="playBtn" onclick="togglePlay()"><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><polygon points="5,3 19,12 5,21"/></svg></button>
+        <button class="ctrl-btn" onclick="stepFrame(1)"><svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><polygon points="9,4 20,12 9,20"/><polygon points="3,4 14,12 3,20"/></svg></button>
+        <button class="ctrl-btn" id="loopBtn" onclick="toggleLoop(this)"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="17,1 21,5 17,9"/><path d="M3,11V9a4,4,0,0,1,4-4h14"/><polyline points="7,23 3,19 7,15"/><path d="M21,13v2a4,4,0,0,1-4,4H3"/></svg></button>
+        <div class="tc-display" id="tcDisplay">00:00:02:14 <span class="fc">f68</span></div>
+        <span class="tc-total">/ 00:00:09:00</span>
+        <div class="ctrl-spacer"></div>
+        <div class="tool-group">
+          <button class="tool-btn active" data-tip="SELECT" onclick="setTool(this,'select')"><svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M5,3 L5,21 L12,14 L16,21 L19,20 L15,13 L21,13Z"/></svg></button>
+          <button class="tool-btn" data-tip="DRAW" onclick="setTool(this,'draw')"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 013 3L7 19l-4 1 1-4L16.5 3.5z"/></svg></button>
+          <button class="tool-btn" data-tip="ARROW" onclick="setTool(this,'arrow')"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="5" y1="19" x2="19" y2="5"/><polyline points="13,5 19,5 19,11"/></svg></button>
+          <button class="tool-btn" data-tip="PIN" onclick="setTool(this,'pin')"><svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="10" r="5"/><path d="M12,15L12,21" stroke="currentColor" stroke-width="2"/></svg></button>
+          <button class="tool-btn" data-tip="CLEAR" onclick="clearDraw()"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="3,6 5,6 21,6"/><path d="M19,6l-1,14H6L5,6"/></svg></button>
+        </div>
+        <div style="display:flex;gap:4px;align-items:center;">
+          <div onclick="setColor('#ff6b6b',this)" style="width:13px;height:13px;border-radius:50%;background:#ff6b6b;cursor:pointer;border:2px solid #ff6b6b;"></div>
+          <div onclick="setColor('#7b61ff',this)" style="width:13px;height:13px;border-radius:50%;background:#7b61ff;cursor:pointer;border:2px solid transparent;"></div>
+          <div onclick="setColor('#e8ff47',this)" style="width:13px;height:13px;border-radius:50%;background:#e8ff47;cursor:pointer;border:2px solid transparent;"></div>
+          <div onclick="setColor('#fff',this)" style="width:13px;height:13px;border-radius:50%;background:#fff;cursor:pointer;border:2px solid transparent;"></div>
+        </div>
+        <!-- Speed control -->
+        <div class="speed-wrap" id="speedWrap">
+          <button class="speed-btn" id="speedBtn" onclick="toggleSpeedMenu()">1×</button>
+          <div class="speed-menu" id="speedMenu">
+            <div class="speed-opt" data-v="0.25" onclick="setSpeed(0.25,this)">0.25×</div>
+            <div class="speed-opt" data-v="0.5" onclick="setSpeed(0.5,this)">0.5×</div>
+            <div class="speed-opt" data-v="0.75" onclick="setSpeed(0.75,this)">0.75×</div>
+            <div class="speed-opt active" data-v="1" onclick="setSpeed(1,this)">1×</div>
+            <div class="speed-opt" data-v="1.5" onclick="setSpeed(1.5,this)">1.5×</div>
+            <div class="speed-opt" data-v="2" onclick="setSpeed(2,this)">2×</div>
+            <div class="speed-opt" data-v="3" onclick="setSpeed(3,this)">3×</div>
+          </div>
+        </div>
+        <div class="fps-badge" onclick="cycleFPS(this)">24fps</div>
+        <button class="ctrl-btn" onclick="toggleMute(this)"><svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><polygon points="11,5 6,9 2,9 2,15 6,15 11,19"/><path d="M15.54,8.46a5,5,0,0,1,0,7.07" stroke="currentColor" stroke-width="2" fill="none"/><path d="M19.07,4.93a10,10,0,0,1,0,14.14" stroke="currentColor" stroke-width="2" fill="none"/></svg></button>
+      </div>
+    </div>
+  </div>
+
+  <!-- COMMENT PANEL -->
+  <div class="comment-panel">
+    <div class="cp-header">
+      <div class="cp-title">Notes <span class="cc">5</span></div>
+    </div>
+    <!-- Review queue — managers/admin only -->
+    <div id="reviewQueueBanner"></div>
+    <div class="cp-filter">
+      <button class="fchip active">All</button>
+      <button class="fchip">Open</button>
+      <button class="fchip">Resolved</button>
+      <button class="fchip">Mine</button>
+    </div>
+    <div class="comments-list" id="commentsList">
+      <div class="citem active" id="c1" onclick="selComment(1)">
+        <div class="cstat st-open"></div>
+        <div class="ci-hd"><div class="ci-av ap1" style="background:#2d1b4e;color:#7b61ff;">JK</div><div class="ci-nm">Jamie K</div><span class="ci-role-badge crb-admin" title="Admin">ADMIN</span><div class="ci-tc">00:00:01:08</div></div>
+        <div class="ci-body">The arc on the logo entrance feels too abrupt — ease into it more?</div>
+        <div class="ci-foot"><span class="ci-rx">👀 2</span><span class="ci-rp">Reply</span></div>
+      </div>
+      <div class="citem" id="c2" onclick="selComment(2)">
+        <div class="cstat st-wip"></div>
+        <div class="ci-hd"><div class="ci-av ap1" style="background:#2d1b4e;color:#7b61ff;">JK</div><div class="ci-nm">Jamie K</div><span class="ci-role-badge crb-admin" title="Admin">ADMIN</span><div class="ci-tc">00:00:02:14</div></div>
+        <div class="ci-body">Colour shift here — purple feels too warm. Shift hue -8°.</div>
+        <div class="ci-foot"><span class="ci-rx">💜 1</span><span class="ci-rp">Reply</span></div>
+      </div>
+      <div class="citem" id="c3" onclick="selComment(3)">
+        <div class="cstat st-open"></div>
+        <div class="ci-hd"><div class="ci-av ap2" style="background:#1b3a1b;color:#6dff6d;">MR</div><div class="ci-nm">Marcus R</div><span class="ci-role-badge crb-manager" title="CD">CD</span><div class="ci-tc">00:00:04:02</div></div>
+        <div class="ci-body">Particle density too heavy. Drop to ~60% and vary size distribution.</div>
+        <div class="ci-foot"><span class="ci-rx">🔥 3</span><span class="ci-rp">Reply</span></div>
+      </div>
+      <div class="citem" id="c4" onclick="selComment(4)" style="opacity:.55;">
+        <div class="cstat st-done"></div>
+        <div class="ci-hd"><div class="ci-av ap3" style="background:#3a1b1b;color:#ff6b6b;">AL</div><div class="ci-nm">Aiko L</div><div class="ci-tc">00:00:06:11</div></div>
+        <div class="ci-body">Tracking on end title looks great — resolved ✓</div>
+        <div class="ci-foot"><span class="ci-rx">✅ done</span></div>
+      </div>
+      <div class="citem" id="c5" onclick="selComment(5)">
+        <div class="cstat st-open"></div>
+        <div class="ci-hd"><div class="ci-av ap2" style="background:#1b3a1b;color:#6dff6d;">MR</div><div class="ci-nm">Marcus R</div><span class="ci-role-badge crb-manager" title="CD">CD</span><div class="ci-tc">00:00:07:20</div></div>
+        <div class="ci-body">Reveal lands at 7:20 but music hit is 7:18 — shift 2 frames earlier.</div>
+        <div class="ci-foot"><span class="ci-rx">🎵 2</span><span class="ci-rp">Reply</span></div>
+      </div>
+    </div>
+    <div class="cp-input">
+      <div class="tc-badge" id="tcBadge">Timecode: 00:00:02:14</div>
+      <textarea class="c-textarea" placeholder="Add a note at this frame…" id="commentInput"></textarea>
+      <div class="ci-tools">
+        <button class="ci-tool">✏ Draw</button>
+        <button class="ci-tool">📍 Pin</button>
+        <select class="ci-tool" id="commentVisSelect" style="cursor:pointer;appearance:none;-webkit-appearance:none;padding:3px 8px;">
+          <option value="all">🌐 All</option>
+          <option value="leads">👁 Leads only</option>
+        </select>
+        <button class="post-btn" onclick="postComment()">Post</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════ DEEP DIVE OVERLAY ═══════════ -->
+<div class="dive-overlay" id="diveOverlay">
+
+  <div class="dive-topbar">
+    <div class="dive-back" onclick="closeDive()">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15,18 9,12 15,6"/></svg>
+      Team View
+    </div>
+    <div class="dive-artist-av" id="diveAv"></div>
+    <div>
+      <div style="display:flex;align-items:center;gap:0;">
+        <div class="dive-who" id="diveWho"></div>
+        <div class="dive-channel">#nuance-switch</div>
+      </div>
+    </div>
+    <div class="dive-stats" id="diveStats"></div>
+
+    <!-- Artist switcher -->
+    <div class="dive-switcher" id="diveSwitcher"></div>
+
+    <button class="dive-close" onclick="closeDive()">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+    </button>
+  </div>
+
+  <div class="dive-filters">
+    <span class="dive-filter-label">TYPE</span>
+    <button class="df-chip active" onclick="diveFilter('all',this)">All</button>
+    <button class="df-chip" onclick="diveFilter('video',this)">Video</button>
+    <button class="df-chip" onclick="diveFilter('still',this)">Stills</button>
+    <button class="df-chip" onclick="diveFilter('open',this)">Has notes</button>
+    <button class="df-chip" onclick="diveFilter('approved',this)">Approved</button>
+    <div class="dive-view-toggle">
+      <button class="dvt-btn active" id="dvt-grid" onclick="setDiveView('grid',this)" title="Grid">
+        <svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+      </button>
+      <button class="dvt-btn" id="dvt-dense" onclick="setDiveView('dense',this)" title="Dense">
+        <svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor"><rect x="2" y="2" width="5" height="5" rx="1"/><rect x="9" y="2" width="5" height="5" rx="1"/><rect x="16" y="2" width="5" height="5" rx="1"/><rect x="2" y="9" width="5" height="5" rx="1"/><rect x="9" y="9" width="5" height="5" rx="1"/><rect x="16" y="9" width="5" height="5" rx="1"/><rect x="2" y="16" width="5" height="5" rx="1"/><rect x="9" y="16" width="5" height="5" rx="1"/><rect x="16" y="16" width="5" height="5" rx="1"/></svg>
+      </button>
+      <button class="dvt-btn" id="dvt-strip" onclick="setDiveView('strip',this)" title="List">
+        <svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor"><rect x="3" y="4" width="18" height="4" rx="1"/><rect x="3" y="11" width="18" height="4" rx="1"/><rect x="3" y="18" width="18" height="4" rx="1"/></svg>
+      </button>
+    </div>
+  </div>
+
+  <div class="dive-body" id="diveBody"></div>
+</div>
+
+<!-- ═══════════ TEAM VIEW OVERLAY ═══════════ -->
+<div class="team-overlay" id="teamOverlay">
+  <div class="team-topbar">
+    <div class="team-title">Team View <span>NUANCE_SWITCH</span></div>
+    <div class="team-date-badge" id="teamDate">THU 12 MAR 2026</div>
+    <div style="margin-left:12px;">
+      <button class="team-btn" onclick="openDive('ALL')" style="font-size:10px;padding:4px 10px;border-color:rgba(232,255,71,.25);color:var(--accent);">
+        <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="3"/><path d="M3 12h3M18 12h3M12 3v3M12 18v3"/></svg>
+        All Artists Timeline
+      </button>
+    </div>
+    <button class="team-close" onclick="closeTeamView()">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+    </button>
+  </div>
+
+  <div class="team-filters">
+    <span class="tf-label">FILTER</span>
+    <button class="tf-chip active" onclick="teamFilter('all',this)">All</button>
+    <button class="tf-chip" onclick="teamFilter('open',this)">Open notes</button>
+    <button class="tf-chip" onclick="teamFilter('review',this)">In review</button>
+    <button class="tf-chip" onclick="teamFilter('approved',this)">Approved</button>
+    <div class="tf-spacer"></div>
+    <div class="tf-stat"><span>18</span> uploads today across <span>4</span> artists</div>
+  </div>
+
+  <div class="team-scroll" id="teamScroll">
+    <!-- Lanes injected by JS -->
+  </div>
+</div>
+
+<!-- ═══════════ ARCHIVE OVERLAY ═══════════ -->
+<div class="archive-overlay" id="archiveOverlay">
+  <div class="archive-topbar">
+    <div>
+      <div class="archive-title">Dailies Archive</div>
+      <div class="archive-sub">NUANCE_SWITCH · All past dailies</div>
+    </div>
+    <button class="archive-close" onclick="closeArchive()">✕</button>
+  </div>
+  <!-- Artist filter chips -->
+  <div class="archive-filters">
+    <span class="af-label">ARTIST</span>
+    <button class="af-chip active" onclick="setArchiveFilter('ALL',this)">Everyone</button>
+    <button class="af-chip" onclick="setArchiveFilter('JK',this)">
+      <div class="af-av ap1" style="background:#2d1b4e;color:#7b61ff;">JK</div>Jamie K
+    </button>
+    <button class="af-chip" onclick="setArchiveFilter('MR',this)">
+      <div class="af-av ap2" style="background:#1b3a1b;color:#6dff6d;">MR</div>Marcus R
+    </button>
+    <button class="af-chip" onclick="setArchiveFilter('AL',this)">
+      <div class="af-av ap3" style="background:#3a1b1b;color:#ff6b6b;">AL</div>Aiko L
+    </button>
+    <button class="af-chip" onclick="setArchiveFilter('DC',this)">
+      <div class="af-av ap4" style="background:#1a2a3a;color:#61c8ff;">DC</div>Dev Chen
+    </button>
+    <button class="af-chip" onclick="setArchiveFilter('SM',this)">
+      <div class="af-av ap5" style="background:#2a2a1a;color:#ffcc44;">SM</div>Sara M
+    </button>
+  </div>
+  <div class="archive-body" id="archiveBody">
+    <!-- Injected by JS -->
+  </div>
+</div>
+
+<!-- VIS MODAL -->
+<div class="modal-backdrop" id="visModal" onclick="bgClose('visModal',event)">
+  <div class="modal" onclick="event.stopPropagation()">
+    <div class="modal-hd">
+      <div><div class="modal-title">Visibility &amp; Access</div><div class="modal-sub" id="modalAsset">Brand_Ident_v04.mov</div></div>
+      <div class="modal-x" onclick="closeModal('visModal')">✕</div>
+    </div>
+    <div class="vis-opts">
+      <div class="vo s-pub" id="op-public" onclick="pickV('public')"><div class="vo-ic ic-pub">🌐</div><div class="vo-bd"><div class="vo-tt">Team — Everyone</div><div class="vo-ds">All members of Studio Orbit can view and comment.</div></div><div class="vo-ck">✓</div></div>
+      <div class="vo" id="op-restricted" onclick="pickV('restricted')"><div class="vo-ic ic-res">👥</div><div class="vo-bd"><div class="vo-tt">Restricted — Tagged people only</div><div class="vo-ds">Only people you tag can open this. Set per-person roles.</div></div><div class="vo-ck"></div></div>
+      <div class="vo" id="op-private" onclick="pickV('private')"><div class="vo-ic ic-prv">🔒</div><div class="vo-bd"><div class="vo-tt">Private — Only you</div><div class="vo-ds">Completely hidden from everyone. For rough WIPs not ready to share.</div></div><div class="vo-ck"></div></div>
+    </div>
+    <div class="pp" id="peoplePicker">
+      <div class="pp-lbl">Who can access this</div>
+      <div class="people-grid">
+        <div class="pchip on" onclick="toggleP(this)"><div class="pc-av ap2" style="background:#1b3a1b;color:#6dff6d;">MR</div><span>Marcus R</span><select class="prole r-c" onclick="event.stopPropagation()" onchange="chRole(this)"><option value="v">👁 View</option><option value="c" selected>💬 Comment</option><option value="a">✓ Approve</option></select><div class="pck">✓</div></div>
+        <div class="pchip on" onclick="toggleP(this)"><div class="pc-av ap3" style="background:#3a1b1b;color:#ff6b6b;">AL</div><span>Aiko L</span><select class="prole r-c" onclick="event.stopPropagation()" onchange="chRole(this)"><option value="v">👁 View</option><option value="c" selected>💬 Comment</option><option value="a">✓ Approve</option></select><div class="pck">✓</div></div>
+        <div class="pchip" onclick="toggleP(this)"><div class="pc-av ap4" style="background:#1a2a3a;color:#61c8ff;">DC</div><span>Dev Chen</span><select class="prole" onclick="event.stopPropagation()" onchange="chRole(this)"><option value="v" selected>👁 View</option><option value="c">💬 Comment</option><option value="a">✓ Approve</option></select><div class="pck"></div></div>
+        <div class="pchip" onclick="toggleP(this)"><div class="pc-av ap5" style="background:#2a2a1a;color:#ffcc44;">SM</div><span>Sara M</span><select class="prole" onclick="event.stopPropagation()" onchange="chRole(this)"><option value="v" selected>👁 View</option><option value="c">💬 Comment</option><option value="a">✓ Approve</option></select><div class="pck"></div></div>
+      </div>
+      <div class="pp-lbl" style="margin-top:10px;">Invite external reviewer</div>
+      <input type="text" class="ext-inp" placeholder="name@client.com — sends a secure, time-limited link"/>
+      <div class="ext-hint">🔗 External reviewers get a watermarked view-only link.</div>
+    </div>
+    <div class="modal-ft">
+      <div class="mf-info" id="mfInfo">All 5 team members can access</div>
+      <button class="mf-cancel" onclick="closeModal('visModal')">Cancel</button>
+      <button class="mf-save" onclick="saveVis()">Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- LOCKED MODAL -->
+<div class="modal-backdrop" id="lockedModal" onclick="closeModal('lockedModal')">
+  <div class="locked-modal" onclick="event.stopPropagation()">
+    <div class="lk-icon">🔐</div>
+    <div class="lk-title" id="lkTitle">Restricted</div>
+    <div class="lk-desc" id="lkDesc">Contact the owner to request access.</div>
+    <button class="lk-btn" onclick="closeModal('lockedModal')">Got it</button>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toastEl"><div class="tdot" id="tdot"></div><span id="tmsg"></span></div>
+
+<script>
+// ── DATA ───────────────────────────────────────────────────
+const ITEMS = [
+  {name:'Brand_Ident_v04.mov', type:'MOV', vis:'public', notes:5, status:'review', author:'JK'},
+  {name:'Client_Pitch_v02.mp4', type:'MP4', vis:'restricted', notes:2, status:'new', author:'JK'},
+  {name:'Directors_Cut_WIP.mov', type:'MOV', vis:'private', notes:1, status:'review', author:'JK'},
+  {name:'Styleframes_R3.psd', type:'PSD', vis:'restricted', notes:3, status:'review', author:'MR', locked:true},
+  {name:'Particle_test_01.mp4', type:'MP4', vis:'public', notes:8, status:'approved', author:'MR'},
+  {name:'Agency_Proposal.mov', type:'MOV', vis:'private', notes:0, status:'new', author:'AL', locked:true},
+  {name:'CG_render_pass_v1.exr', type:'EXR', vis:'public', notes:1, status:'new', author:'DC'},
+];
+
+// Palette per item index for mock thumbnails
+const PALETTES = [
+  ['#1a1a2e','#7b61ff','#e8ff47'],
+  ['#1a0a0a','#ff6b6b','#ff9f43'],
+  ['#0a0a1a','#61c8ff','#ffffff'],
+  ['#0a1a0a','#6dff6d','#e8ff47'],
+  ['#1a0a1a','#ff6b6b','#7b61ff'],
+  ['#0a1a1a','#61c8ff','#6dff6d'],
+  ['#1a1a0a','#ffcc44','#e8ff47'],
+];
+
+// ── ARCHIVE DATA ───────────────────────────────────────────
+const ARCHIVE = [
+  {date:'Wed 4 Mar 2026', slug:'WED 4 MAR', items:[
+    {name:'Logo_reveal_v03.mov',type:'MOV',vis:'public',notes:7,status:'approved',author:'JK',pal:['#0f1a2e','#61c8ff','#fff']},
+    {name:'Title_card_WIP.mp4',type:'MP4',vis:'restricted',notes:3,status:'review',author:'AL',pal:['#1a0e0e','#ff6b6b','#ffcc44']},
+    {name:'Styleframe_01.psd',type:'PSD',vis:'public',notes:2,status:'approved',author:'MR',pal:['#0a1a12','#6dff6d','#e8ff47']},
+    {name:'BG_anim_test.mp4',type:'MP4',vis:'private',notes:0,status:'new',author:'JK',locked:false,pal:['#1a1a0a','#ffcc44','#fff']},
+    {name:'Client_deck_v01.mp4',type:'MP4',vis:'restricted',notes:4,status:'review',author:'AL',locked:true,pal:['#160a1a','#7b61ff','#e8ff47']},
+  ]},
+  {date:'Tue 3 Mar 2026', slug:'TUE 3 MAR', items:[
+    {name:'Colour_grade_R2.mov',type:'MOV',vis:'public',notes:12,status:'approved',author:'MR',pal:['#1a0a00','#ff9f43','#ffcc44']},
+    {name:'Particle_system_v2.mp4',type:'MP4',vis:'public',notes:5,status:'approved',author:'DC',pal:['#0a0a1a','#7b61ff','#61c8ff']},
+    {name:'Endframe_comp.mov',type:'MOV',vis:'public',notes:3,status:'review',author:'JK',pal:['#0a1a1a','#6dff6d','#e8ff47']},
+    {name:'Directors_cut_v1.mov',type:'MOV',vis:'private',notes:1,status:'review',author:'AL',pal:['#0a0a0a','#ff6b6b','#fff']},
+  ]},
+  {date:'Mon 2 Mar 2026', slug:'MON 2 MAR', items:[
+    {name:'Brand_intro_v01.mov',type:'MOV',vis:'public',notes:9,status:'approved',author:'JK',pal:['#1a1a2e','#7b61ff','#e8ff47']},
+    {name:'Type_anim_test.mp4',type:'MP4',vis:'public',notes:6,status:'approved',author:'MR',pal:['#0a1a0a','#6dff6d','#61c8ff']},
+    {name:'Ref_mood_board.pdf',type:'PDF',vis:'restricted',notes:1,status:'review',author:'AL',locked:true,pal:['#1a0a0a','#ff6b6b','#ffcc44']},
+  ]},
+  {date:'Fri 28 Feb 2026', slug:'FRI 28 FEB', items:[
+    {name:'Concept_render_v1.exr',type:'EXR',vis:'public',notes:4,status:'approved',author:'DC',pal:['#001a1a','#61c8ff','#fff']},
+    {name:'Storyboard_R1.pdf',type:'PDF',vis:'restricted',notes:2,status:'review',author:'AL',locked:true,pal:['#1a0a1a','#ff6b6b','#7b61ff']},
+    {name:'Music_sync_test.mp4',type:'MP4',vis:'public',notes:3,status:'approved',author:'MR',pal:['#0a0a1a','#ffcc44','#e8ff47']},
+    {name:'Logo_motion_v01.mov',type:'MOV',vis:'public',notes:11,status:'approved',author:'JK',pal:['#1a1a0a','#e8ff47','#6dff6d']},
+    {name:'Private_sketch.mov',type:'MOV',vis:'private',notes:0,status:'new',author:'JK',pal:['#0a0a0a','#555','#888']},
+  ]},
+];
+
+// ── STATE ──────────────────────────────────────────────────
+let frame=0; // integer frame, kept in sync with framePos
+let tool='select', drawColor='#ff6b6b';
+let curVis='public', pendVis='public', curIdx=0;
+
+// ── CANVAS THUMBNAILS ──────────────────────────────────────
+function drawThumb(canvas, pal, locked) {
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  const w = canvas.width, h = canvas.height;
+  ctx.clearRect(0,0,w,h);
+  const g = ctx.createLinearGradient(0,0,w,h);
+  g.addColorStop(0, pal[0]); g.addColorStop(1, pal[0]+'cc');
+  ctx.fillStyle = g; ctx.fillRect(0,0,w,h);
+  // Abstract shapes
+  ctx.globalAlpha = 0.5;
+  const rg = ctx.createRadialGradient(w*.3,h*.5,2,w*.3,h*.5,w*.4);
+  rg.addColorStop(0, pal[1]+'88'); rg.addColorStop(1,'transparent');
+  ctx.fillStyle = rg; ctx.fillRect(0,0,w,h);
+  ctx.globalAlpha = 0.35;
+  ctx.beginPath(); ctx.arc(w*.7, h*.3, w*.2, 0, Math.PI*2);
+  ctx.fillStyle = pal[2]+'55'; ctx.fill();
+  ctx.globalAlpha = 1;
+  if (locked) { ctx.fillStyle='rgba(0,0,0,.4)'; ctx.fillRect(0,0,w,h); }
+}
+
+// Main viewer canvas
+function drawMainCanvas(idx) {
+  const pal = PALETTES[idx] || PALETTES[0];
+  const canvas = document.getElementById('mainCanvas');
+  canvas.style.width='100%'; canvas.style.height='100%';
+  const vf = document.getElementById('videoFrame');
+  const w = vf.clientWidth||960, h = w * (9/16);
+  canvas.width=w; canvas.height=h;
+  const ctx = canvas.getContext('2d');
+  const g = ctx.createLinearGradient(0,0,w,h);
+  g.addColorStop(0, pal[0]); g.addColorStop(.5, adjustBright(pal[0],.15)); g.addColorStop(1, pal[0]);
+  ctx.fillStyle=g; ctx.fillRect(0,0,w,h);
+  // Large circle
+  ctx.globalAlpha=.15;
+  const rg=ctx.createRadialGradient(w*.35,h*.5,10,w*.35,h*.5,w*.38);
+  rg.addColorStop(0,pal[1]); rg.addColorStop(1,'transparent');
+  ctx.fillStyle=rg; ctx.fillRect(0,0,w,h);
+  // Shape
+  ctx.globalAlpha=.25;
+  ctx.beginPath(); ctx.roundRect(w*.58,h*.15,w*.22,w*.22*.6,8);
+  ctx.fillStyle=pal[1]+'88'; ctx.fill();
+  // Glow column
+  ctx.globalAlpha=.15;
+  const cg=ctx.createLinearGradient(w*.18,0,w*.22,h);
+  cg.addColorStop(0,pal[2]); cg.addColorStop(1,'transparent');
+  ctx.fillStyle=cg; ctx.fillRect(w*.18,0,w*.04,h*.7);
+  // Title text
+  ctx.globalAlpha=.85;
+  ctx.font=`bold ${Math.floor(h*.1)}px Syne, sans-serif`;
+  ctx.fillStyle=pal[2]; ctx.fillText(ITEMS[idx]?.name.split('_')[0].toUpperCase()||'ORBIT',w*.1,h*.68);
+  ctx.font=`${Math.floor(h*.055)}px Syne, sans-serif`;
+  ctx.fillStyle='rgba(255,255,255,.5)'; ctx.fillText(ITEMS[idx]?.name.split('.')[0]||'',w*.1,h*.78);
+  ctx.globalAlpha=1;
+}
+function adjustBright(hex,amt){
+  let c=parseInt(hex.replace('#',''),16);
+  let r=Math.min(255,((c>>16)&0xff)+Math.round(amt*255));
+  let g=Math.min(255,((c>>8)&0xff)+Math.round(amt*255));
+  let b=Math.min(255,(c&0xff)+Math.round(amt*255));
+  return '#'+[r,g,b].map(x=>x.toString(16).padStart(2,'0')).join('');
+}
+
+// Archive mini canvas
+function drawArchiveThumb(canvas, pal) {
+  if (!canvas) return;
+  const ctx=canvas.getContext('2d'), w=canvas.width, h=canvas.height;
+  ctx.clearRect(0,0,w,h);
+  const g=ctx.createLinearGradient(0,0,w,h);
+  g.addColorStop(0,pal[0]); g.addColorStop(1,pal[0]+'bb');
+  ctx.fillStyle=g; ctx.fillRect(0,0,w,h);
+  ctx.globalAlpha=.4;
+  const rg=ctx.createRadialGradient(w*.3,h*.5,1,w*.3,h*.5,w*.35);
+  rg.addColorStop(0,pal[1]+'99'); rg.addColorStop(1,'transparent');
+  ctx.fillStyle=rg; ctx.fillRect(0,0,w,h);
+  ctx.beginPath(); ctx.arc(w*.72,h*.35,h*.3,0,Math.PI*2);
+  ctx.fillStyle=pal[2]+'44'; ctx.fill();
+  ctx.globalAlpha=1;
+}
+
+// ── TIMECODE ───────────────────────────────────────────────
+function pad(n){return String(n).padStart(2,'0');}
+function tc(f){const s=Math.floor(f/24),fr=f%24,m=Math.floor(s/60),h=Math.floor(m/60);return`${pad(h)}:${pad(m%60)}:${pad(s%60)}:${pad(fr)}`;}
+function refreshUI(){
+  const t=tc(frame);
+  document.getElementById('tcDisplay').innerHTML=`${t} <span class="fc">f${frame}</span>`;
+  document.getElementById('tcBadge').textContent=`Timecode: ${t}`;
+  document.getElementById('playhead').style.left=(frame/totalFrames*100)+'%';
+  refreshWave();
+}
+
+// ── FULLSCREEN ─────────────────────────────────────────────
+let isFS = false;
+function toggleFullscreen(e){
+  e.stopPropagation();
+  isFS = !isFS;
+  const viewer = document.querySelector('.viewer');
+  const icon = document.getElementById('fsIcon');
+  if(isFS){
+    viewer.classList.add('fullscreen');
+    icon.innerHTML=`<path d="M8 3v3a2 2 0 01-2 2H3m18 0h-3a2 2 0 01-2-2V3m0 18v-3a2 2 0 012-2h3M3 16h3a2 2 0 012 2v3"/>`;
+  } else {
+    viewer.classList.remove('fullscreen');
+    icon.innerHTML=`<path d="M8 3H5a2 2 0 00-2 2v3m18 0V5a2 2 0 00-2-2h-3m0 18h3a2 2 0 002-2v-3M3 16v3a2 2 0 002 2h3"/>`;
+  }
+  setTimeout(()=>drawMainCanvas(curIdx),50);
+}
+// Close fullscreen on Escape — handled in keyboard shortcuts block above
+
+// ── WAVEFORM (canvas, fills container width) ───────────────
+let waveData = []; // random heights, generated once per asset
+function genWaveData(n=200){waveData=[];for(let i=0;i<n;i++)waveData.push(0.15+Math.random()*.7+Math.sin(i*.18)*.15);}
+function drawWave(){
+  const canvas=document.getElementById('waveform');
+  if(!canvas)return;
+  const track=canvas.parentElement;
+  const W=track.clientWidth||600, H=track.clientHeight||32;
+  canvas.width=W; canvas.height=H;
+  const ctx=canvas.getContext('2d');
+  ctx.clearRect(0,0,W,H);
+  const n=waveData.length, barW=Math.max(1,(W-16)/n-1.5), gap=1.5, pad=8;
+  const progress=frame/totalFrames;
+  for(let i=0;i<n;i++){
+    const x=pad+i*(barW+gap);
+    const h=Math.max(3,waveData[i]*(H-8));
+    const y=(H-h)/2;
+    const played=i/n<progress;
+    ctx.fillStyle=played?'rgba(232,255,71,0.45)':'rgba(255,255,255,0.09)';
+    ctx.beginPath();
+    ctx.roundRect(x,y,barW,h,1);
+    ctx.fill();
+  }
+}
+function refreshWave(){drawWave();}
+function buildWave(){genWaveData();drawWave();}
+// Redraw waveform on resize handled inside init()
+
+// ── PLAYBACK ENGINE (requestAnimationFrame, sub-frame accumulator) ──
+let playing=false, speed=1, rafId=null, lastTs=null, frameAccum=0;
+let baseFPS=24, looping=false;
+// fractional frame position for smooth sub-frame accumulation
+let framePos=68; // float
+const totalFrames=216;
+
+function startRAF(){
+  lastTs=null; frameAccum=0;
+  function tick(ts){
+    if(!playing){rafId=null;return;}
+    if(lastTs!==null){
+      const elapsed=(ts-lastTs)/1000; // seconds
+      frameAccum+=elapsed*baseFPS*speed;
+      while(frameAccum>=1){
+        framePos++;
+        frameAccum-=1;
+        if(framePos>=totalFrames){
+          if(looping){framePos=0;}
+          else{framePos=totalFrames-1;stopPlay();return;}
+        }
+      }
+      frame=Math.floor(framePos);
+      refreshUI();
+    }
+    lastTs=ts;
+    rafId=requestAnimationFrame(tick);
+  }
+  rafId=requestAnimationFrame(tick);
+}
+function stopPlay(){
+  playing=false;
+  if(rafId){cancelAnimationFrame(rafId);rafId=null;}
+  const po=document.getElementById('playOverlay'),pb=document.getElementById('playBtn');
+  po.style.opacity='1';po.style.pointerEvents='auto';
+  pb.innerHTML=`<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><polygon points="5,3 19,12 5,21"/></svg>`;
+}
+function togglePlay(e){
+  if(e)e.stopPropagation();
+  playing=!playing;
+  const po=document.getElementById('playOverlay'),pb=document.getElementById('playBtn');
+  if(playing){
+    po.style.opacity='0';po.style.pointerEvents='none';
+    pb.innerHTML=`<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>`;
+    startRAF();
+  } else {
+    stopPlay();
+  }
+}
+function goStart(){stopPlay();framePos=0;frame=0;refreshUI();}
+function stepFrame(d){
+  stopPlay();
+  framePos=Math.max(0,Math.min(totalFrames-1,framePos+d));
+  frame=Math.floor(framePos);
+  refreshUI();
+}
+function toggleLoop(btn){looping=!looping;btn.style.color=looping?'var(--accent)':'';}
+
+// ── DRAG SCRUBBING ──────────────────────────────────────────
+// Uses pointermove for buttery capture — no mouse event gaps
+(function initScrub(){
+  const tl=document.getElementById('timeline');
+  let scrubbing=false, wasPlaying=false;
+
+  function posToFrame(clientX){
+    const r=tl.getBoundingClientRect();
+    const t=Math.max(0,Math.min(1,(clientX-r.left)/r.width));
+    return t*(totalFrames-1);
+  }
+  function applyPos(clientX){
+    framePos=posToFrame(clientX);
+    frame=Math.floor(framePos);
+    refreshUI();
+  }
+
+  tl.addEventListener('pointerdown',e=>{
+    if(e.button!==0)return;
+    e.preventDefault();
+    tl.setPointerCapture(e.pointerId);
+    scrubbing=true;
+    wasPlaying=playing;
+    if(playing)stopPlay();
+    tl.classList.add('scrubbing');
+    applyPos(e.clientX);
+  });
+  tl.addEventListener('pointermove',e=>{
+    if(!scrubbing)return;
+    applyPos(e.clientX);
+  });
+  function endScrub(e){
+    if(!scrubbing)return;
+    scrubbing=false;
+    tl.classList.remove('scrubbing');
+    tl.releasePointerCapture(e.pointerId);
+    if(wasPlaying){
+      playing=true;
+      const po=document.getElementById('playOverlay'),pb=document.getElementById('playBtn');
+      po.style.opacity='0';po.style.pointerEvents='none';
+      pb.innerHTML=`<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>`;
+      startRAF();
+    }
+  }
+  tl.addEventListener('pointerup',endScrub);
+  tl.addEventListener('pointercancel',endScrub);
+})();
+
+// ── SPEED CONTROL ───────────────────────────────────────────
+function toggleSpeedMenu(){
+  document.getElementById('speedMenu').classList.toggle('open');
+}
+function setSpeed(v,el){
+  speed=v;
+  document.querySelectorAll('.speed-opt').forEach(o=>o.classList.remove('active'));
+  el.classList.add('active');
+  const btn=document.getElementById('speedBtn');
+  btn.textContent=v===1?'1×':v+'×';
+  btn.classList.toggle('active',v!==1);
+  document.getElementById('speedMenu').classList.remove('open');
+}
+// Close speed menu on outside click
+document.addEventListener('click',e=>{
+  if(!document.getElementById('speedWrap').contains(e.target))
+    document.getElementById('speedMenu').classList.remove('open');
+});
+// Keyboard shortcuts
+document.addEventListener('keydown',e=>{
+  if(e.target.tagName==='TEXTAREA'||e.target.tagName==='INPUT')return;
+  if(e.key===' '){e.preventDefault();togglePlay();}
+  if(e.key==='ArrowLeft'){e.preventDefault();stepFrame(e.shiftKey?-10:-1);}
+  if(e.key==='ArrowRight'){e.preventDefault();stepFrame(e.shiftKey?10:1);}
+  if(e.key==='ArrowUp'){e.preventDefault();goStart();}
+  if(e.key==='j'){stepFrame(-10);}
+  if(e.key==='k'){togglePlay();}
+  if(e.key==='l'){stepFrame(10);}
+  if(e.key==='Escape'&&isFS){isFS=true;toggleFullscreen({stopPropagation:()=>{}});}
+});
+
+const fpsList=['24fps','25fps','30fps','60fps'];let fpsI=0;
+function cycleFPS(el){fpsI=(fpsI+1)%fpsList.length;el.textContent=fpsList[fpsI];baseFPS=[24,25,30,60][fpsI];}
+function toggleMute(btn){btn.style.opacity=btn.style.opacity==='0.35'?'1':'0.35';}
+
+// ── TOOLS ──────────────────────────────────────────────────
+function setTool(btn,t){
+  document.querySelectorAll('.tool-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');tool=t;
+  document.getElementById('videoFrame').style.cursor=t==='draw'?'crosshair':t==='pin'?'cell':'pointer';
+}
+function setColor(c,el){
+  drawColor=c;
+  document.querySelectorAll('[onclick^="setColor"]').forEach(d=>d.style.border='2px solid transparent');
+  el.style.border='2px solid '+c;
+}
+function clearDraw(){const o=document.getElementById('drawOverlay');while(o.children.length)o.removeChild(o.firstChild);}
+
+// ── DRAW ───────────────────────────────────────────────────
+(function(){
+  const fr=document.getElementById('videoFrame'),ov=document.getElementById('drawOverlay');
+  let dg=false,pe=null,pts=[];
+  fr.addEventListener('mousedown',e=>{if(tool!=='draw')return;e.preventDefault();dg=true;pts=[];pe=document.createElementNS('http://www.w3.org/2000/svg','path');pe.setAttribute('fill','none');pe.setAttribute('stroke',drawColor);pe.setAttribute('stroke-width','2.5');pe.setAttribute('stroke-linecap','round');pe.setAttribute('stroke-linejoin','round');pe.setAttribute('opacity','.85');ov.appendChild(pe);});
+  fr.addEventListener('mousemove',e=>{if(!dg||tool!=='draw')return;const r=fr.getBoundingClientRect();pts.push([((e.clientX-r.left)/r.width)*960,((e.clientY-r.top)/r.height)*540]);if(pts.length>1){let d=`M ${pts[0][0]} ${pts[0][1]}`;for(let i=1;i<pts.length;i++)d+=` L ${pts[i][0]} ${pts[i][1]}`;pe.setAttribute('d',d);}});
+  fr.addEventListener('mouseup',()=>dg=false);
+  fr.addEventListener('mouseleave',()=>dg=false);
+})();
+
+// ── LOAD ITEM ──────────────────────────────────────────────
+function loadItem(idx,e){
+  if(e)e.stopPropagation();
+  stopPlay();
+  framePos=0; frame=0;
+  document.querySelectorAll('.thumb-item').forEach(i=>i.classList.remove('active'));
+  document.getElementById('ti-'+idx)?.classList.add('active');
+  curIdx=idx; const item=ITEMS[idx];
+  if(!item)return;
+  curVis=item.vis; pendVis=item.vis;
+  applyVisPill(item.vis);
+  const vf=document.getElementById('videoFrame');
+  vf.className='video-frame'+(item.vis==='private'?' is-private':item.vis==='restricted'?' is-restricted':'');
+  document.getElementById('viewerTitle').textContent=item.name;
+  document.getElementById('visPill').title='Click to change visibility';
+  drawMainCanvas(idx);
+  genWaveData(); drawWave();
+  const msgs={public:'Team access',restricted:'Restricted — tagged people only',private:'Private — only you'};
+  const cols={public:'#6dff6d',restricted:'#7b61ff',private:'#ff6b6b'};
+  toast(msgs[item.vis],cols[item.vis]);
+}
+
+// ── COMMENTS ───────────────────────────────────────────────
+function selComment(id,e){if(e)e.stopPropagation();document.querySelectorAll('.citem').forEach(c=>c.classList.remove('active'));document.getElementById('c'+id)?.classList.add('active');}
+function postComment(){
+  const inp=document.getElementById('commentInput'),txt=inp.value.trim();if(!txt)return;
+  const list=document.getElementById('commentsList'),t=tc(frame);
+  const d=document.createElement('div');d.className='citem active';
+  d.innerHTML=`<div class="cstat st-open"></div><div class="ci-hd"><div class="ci-av ap1" style="background:#2d1b4e;color:#7b61ff;">JK</div><div class="ci-nm">Jamie K (you)</div><div class="ci-tc">${t}</div></div><div class="ci-body">${txt}</div><div class="ci-foot"><span class="ci-rx">just now</span><span class="ci-rp">Reply</span></div>`;
+  document.querySelectorAll('.citem').forEach(c=>c.classList.remove('active'));
+  list.insertBefore(d,list.firstChild);inp.value='';
+}
+
+// ── VIS MODAL ──────────────────────────────────────────────
+function openVisModal(){
+  pendVis=curVis;
+  document.getElementById('modalAsset').textContent=document.getElementById('viewerTitle').textContent;
+  refreshVOpts(curVis);syncPP(curVis);
+  document.getElementById('visModal').classList.add('open');
+}
+function pickV(v){pendVis=v;refreshVOpts(v);syncPP(v);}
+function refreshVOpts(v){
+  const M={public:'s-pub',restricted:'s-res',private:'s-prv'};
+  ['public','restricted','private'].forEach(o=>{const el=document.getElementById('op-'+o);el.className='vo'+(o===v?' '+M[v]:'');el.querySelector('.vo-ck').textContent=o===v?'✓':'';});
+}
+function syncPP(v){
+  document.getElementById('peoplePicker').classList.toggle('vis',v==='restricted');
+  const n=document.querySelectorAll('.pchip.on').length;
+  document.getElementById('mfInfo').textContent=v==='public'?'All 5 team members can access':v==='restricted'?`${n} person${n!==1?'s':''} + you can access`:'Only you can see this';
+}
+function saveVis(){
+  curVis=pendVis; applyVisPill(curVis);
+  const vf=document.getElementById('videoFrame');
+  vf.className='video-frame'+(curVis==='private'?' is-private':curVis==='restricted'?' is-restricted':'');
+  const si=document.getElementById('ti-'+curIdx);
+  if(si){
+    si.className='thumb-item active'+(curVis==='private'?' vis-private':curVis==='restricted'?' vis-restricted':'');
+    const vds=si.querySelector('.vis-dot-small');
+    if(vds)vds.className='vis-dot-small vd-'+curVis;
+  }
+  closeModal('visModal');
+  const msgs={public:'Visibility: Team',restricted:'Visibility: Restricted',private:'Visibility: Private — only you'};
+  const cols={public:'#6dff6d',restricted:'#7b61ff',private:'#ff6b6b'};
+  toast(msgs[curVis],cols[curVis]);
+}
+function applyVisPill(v){
+  const p=document.getElementById('visPill');
+  p.className='vis-pill '+v;
+  document.getElementById('visPillLabel').textContent={public:'Team',restricted:'Restricted',private:'Private'}[v];
+}
+function toggleP(chip){chip.classList.toggle('on');chip.querySelector('.pck').textContent=chip.classList.contains('on')?'✓':'';syncPP('restricted');}
+function chRole(sel){const m={v:'',c:'r-c',a:'r-a'};sel.className='prole '+(m[sel.value]||'');}
+
+// ── LOCKED MODAL ───────────────────────────────────────────
+function showLocked(name,owner){
+  document.getElementById('lkTitle').textContent=`"${name}" is restricted`;
+  document.getElementById('lkDesc').textContent=`Owned by ${owner}.\nContact them to request access.`;
+  document.getElementById('lockedModal').classList.add('open');
+}
+
+// ── ARCHIVE ────────────────────────────────────────────────
+const AV_STYLES={JK:['#2d1b4e','#7b61ff'],MR:['#1b3a1b','#6dff6d'],AL:['#3a1b1b','#ff6b6b'],DC:['#1a2a3a','#61c8ff'],SM:['#2a2a1a','#ffcc44']};
+const ARTIST_NAMES={JK:'Jamie K',MR:'Marcus R',AL:'Aiko L',DC:'Dev Chen',SM:'Sara M'};
+
+let archiveFilter = 'ALL';
+
+function setArchiveFilter(id, btn) {
+  archiveFilter = id;
+  document.querySelectorAll('.af-chip').forEach(c => c.classList.remove('active'));
+  btn.classList.add('active');
+  buildArchive();
+}
+
+function openArchive(){
+  archiveFilter = 'ALL';
+  // reset chips
+  document.querySelectorAll('.af-chip').forEach((c,i) => c.classList.toggle('active', i===0));
+  buildArchive();
+  document.getElementById('archiveOverlay').classList.add('open');
+}
+function closeArchive(){document.getElementById('archiveOverlay').classList.remove('open');}
+
+function buildArchive(){
+  const body=document.getElementById('archiveBody');
+  body.innerHTML='';
+
+  // New daily thread button
+  const nb=document.createElement('button');
+  nb.className='new-thread-btn';
+  nb.innerHTML=`<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg> Start new daily thread for today`;
+  nb.onclick=()=>{closeArchive();toast('New daily thread started!','#e8ff47');};
+  body.appendChild(nb);
+
+  // Artist order — determines lane order within each day
+  const ARTIST_ORDER = ['JK','MR','AL','DC','SM'];
+
+  ARCHIVE.forEach(group => {
+    // Filter items
+    const items = archiveFilter === 'ALL'
+      ? group.items
+      : group.items.filter(it => it.author === archiveFilter);
+    if(items.length === 0) return;
+
+    const grp = document.createElement('div');
+    grp.className = 'date-group';
+
+    // Date header
+    const dateHd = document.createElement('div');
+    dateHd.className = 'date-heading';
+    dateHd.innerHTML = `
+      <div class="date-label">${group.date}</div>
+      <div class="date-line"></div>
+      <div class="date-count">${items.length} upload${items.length!==1?'s':''}</div>
+    `;
+    grp.appendChild(dateHd);
+
+    if(archiveFilter === 'ALL') {
+      // Group by artist within the day
+      const byArtist = {};
+      ARTIST_ORDER.forEach(id => { byArtist[id] = []; });
+      items.forEach(it => { if(byArtist[it.author]) byArtist[it.author].push(it); });
+
+      ARTIST_ORDER.forEach(artistId => {
+        const artistItems = byArtist[artistId];
+        if(artistItems.length === 0) return;
+
+        const av = AV_STYLES[artistId] || ['#222','#888'];
+        const name = ARTIST_NAMES[artistId] || artistId;
+        const isYou = artistId === 'JK';
+
+        const subgroup = document.createElement('div');
+        subgroup.className = 'artist-subgroup';
+
+        // Artist sub-header
+        subgroup.innerHTML = `
+          <div class="artist-subhd">
+            <div class="asub-av ${isYou?'you':''}" style="background:${av[0]};color:${av[1]};">${artistId}</div>
+            <div class="asub-name">${name}</div>
+            ${isYou ? '<div class="asub-you">YOU</div>' : ''}
+            <div class="asub-count">${artistItems.length} upload${artistItems.length!==1?'s':''}</div>
+            <div class="asub-line"></div>
+          </div>
+          <div class="archive-grid" id="asg-${group.slug.replace(/ /g,'-')}-${artistId}"></div>
+        `;
+        grp.appendChild(subgroup);
+
+        const grid = subgroup.querySelector('.archive-grid');
+        renderArchiveCards(grid, artistItems, group.slug, artistId, false);
+      });
+
+    } else {
+      // Single artist — no sub-headers needed, just cards
+      const grid = document.createElement('div');
+      grid.className = 'archive-grid';
+      grp.appendChild(grid);
+      renderArchiveCards(grid, items, group.slug, archiveFilter, true);
+    }
+
+    body.appendChild(grp);
+  });
+}
+
+function renderArchiveCards(grid, items, slug, artistId, hideArtist) {
+  items.forEach((item, i) => {
+    const card = document.createElement('div');
+    card.className = 'archive-card' + (item.locked ? ' locked-card' : '');
+    const stripeClass = 'stripe-' + item.vis;
+    const av = AV_STYLES[item.author] || ['#222','#888'];
+    const statusColor = item.status==='approved'?'#6dff6d':item.status==='new'?'var(--accent)':'var(--accent2)';
+    const canvasId = `ac-${slug.replace(/ /g,'-')}-${artistId}-${i}`;
+
+    card.innerHTML = `
+      <div class="ac-thumb">
+        <canvas id="${canvasId}" width="160" height="90"></canvas>
+        ${item.locked ? '<div class="ac-lock">🔐</div>' : ''}
+        <div class="ac-vis-stripe ${stripeClass}"></div>
+      </div>
+      <div class="ac-info">
+        <div class="ac-name">${item.name}</div>
+        <div class="ac-meta">
+          <span class="ac-type">${item.type}</span>
+          <span class="ac-notes">${item.notes} note${item.notes!==1?'s':''}</span>
+          <span class="ac-status" style="background:${statusColor}"></span>
+        </div>
+        ${hideArtist ? '' : `
+        <div class="ac-artist">
+          <div class="ac-av" style="background:${av[0]};color:${av[1]};">${item.author}</div>
+          <span class="ac-artist-name">${ARTIST_NAMES[item.author]||item.author}</span>
+        </div>`}
+      </div>`;
+
+    card.onclick = () => {
+      if(item.locked){ showLocked(item.name,'the owner'); return; }
+      closeArchive();
+      toast(`Opening ${item.name}…`, '#e8ff47');
+    };
+    grid.appendChild(card);
+
+    requestAnimationFrame(() => {
+      const c = document.getElementById(canvasId);
+      if(c) drawArchiveThumb(c, item.pal || ['#111','#7b61ff','#e8ff47']);
+    });
+  });
+}
+
+// ── MODAL HELPERS ──────────────────────────────────────────
+function closeModal(id){document.getElementById(id).classList.remove('open');}
+function bgClose(id,e){if(e.target===document.getElementById(id))closeModal(id);}
+
+// ── TOAST ──────────────────────────────────────────────────
+let tt;
+function toast(msg,col){
+  const el=document.getElementById('toastEl');
+  document.getElementById('tmsg').textContent=msg;
+  document.getElementById('tdot').style.background=col||'var(--accent)';
+  clearTimeout(tt);el.classList.add('show');
+  tt=setTimeout(()=>el.classList.remove('show'),2800);
+}
+
+
+// ══════════════════════════════════════════
+// TEAM VIEW
+// ══════════════════════════════════════════
+const TEAM = [
+  {
+    id:'JK', name:'Jamie K', cls:'ap1', you:true, status:'online',
+    uploads:[
+      {name:'Brand_Ident_v04',type:'MOV',notes:5,vis:'public',status:'review',pal:['#1a1a2e','#7b61ff','#e8ff47']},
+      {name:'Client_Pitch_v02',type:'MP4',notes:2,vis:'restricted',status:'review',pal:['#1a0a0a','#ff6b6b','#ff9f43']},
+      {name:'Particle_test_01',type:'MP4',notes:1,vis:'public',status:'new',pal:['#0a0a1a','#7b61ff','#61c8ff']},
+      {name:'Styleframes_R3',type:'PSD',notes:0,vis:'private',status:'new',pal:['#0f0f18','#e8ff47','#7b61ff']},
+      {name:'Directors_Cut_WIP',type:'MOV',notes:3,vis:'private',status:'review',pal:['#120a0a','#ff6b6b','#ffcc44']},
+    ]
+  },
+  {
+    id:'MR', name:'Marcus R', cls:'ap2', status:'online',
+    uploads:[
+      {name:'CG_Render_v01',type:'EXR',notes:3,vis:'restricted',status:'review',pal:['#0a1a12','#6dff6d','#e8ff47']},
+      {name:'Styleframes_v2',type:'PSD',notes:1,vis:'restricted',status:'new',pal:['#1a1208','#ffcc44','#ff9f43']},
+      {name:'Particle_v2_final',type:'MP4',notes:0,vis:'public',status:'approved',pal:['#0a1220','#61c8ff','#7b61ff']},
+      {name:'Lighting_pass_A',type:'EXR',notes:2,vis:'public',status:'review',pal:['#0d1a0d','#6dff6d','#61c8ff']},
+    ]
+  },
+  {
+    id:'AL', name:'Aiko L', cls:'ap3', status:'away',
+    uploads:[
+      {name:'Titles_v03',type:'AEP',notes:4,vis:'public',status:'review',pal:['#1a0a0a','#ff6b6b','#ffcc44']},
+      {name:'Endcard_R1',type:'MOV',notes:1,vis:'public',status:'approved',pal:['#100a1a','#ff6b6b','#7b61ff']},
+    ]
+  },
+  {
+    id:'DC', name:'Dev Chen', cls:'ap4', status:'online',
+    uploads:[
+      {name:'Comp_v06',type:'MOV',notes:2,vis:'public',status:'review',pal:['#0a1218','#61c8ff','#7b61ff']},
+      {name:'FX_layer_B',type:'MOV',notes:0,vis:'public',status:'new',pal:['#0a1015','#61c8ff','#e8ff47']},
+      {name:'Grade_LUT_test',type:'MOV',notes:3,vis:'restricted',status:'review',pal:['#12101a','#7b61ff','#61c8ff']},
+      {name:'Conform_master',type:'XML',notes:1,vis:'restricted',status:'review',pal:['#101018','#7b61ff','#ffcc44']},
+      {name:'Output_H264',type:'MP4',notes:0,vis:'public',status:'approved',pal:['#0a120e','#6dff6d','#e8ff47']},
+    ]
+  },
+  {
+    id:'SM', name:'Sara M', cls:'ap5', status:'offline',
+    uploads:[] // offline today
+  },
+];
+
+const STATUS_COLORS = {new:'var(--accent)',review:'var(--accent2)',approved:'#6dff6d'};
+const VIS_COLORS = {public:'#6dff6d',restricted:'var(--accent2)',private:'var(--accent3)'};
+let teamFocusId = null;
+
+function openTeamView(focusId) {
+  // Build lanes
+  renderTeamLanes();
+  document.getElementById('teamOverlay').classList.add('open');
+  if(focusId) focusArtist(focusId);
+}
+function closeTeamView() {
+  document.getElementById('teamOverlay').classList.remove('open');
+  teamFocusId = null;
+}
+
+function renderTeamLanes(filter) {
+  const scroll = document.getElementById('teamScroll');
+  scroll.innerHTML = '';
+  TEAM.forEach(artist => {
+    const lane = document.createElement('div');
+    lane.className = 'artist-lane';
+    lane.id = 'lane-'+artist.id;
+
+    // Filter uploads
+    let items = artist.uploads;
+    if(filter && filter!=='all') items = items.filter(u=>u.status===filter||(filter==='open'&&u.notes>0));
+
+    // Header
+    const statusDot = artist.status==='online'?'online':artist.status==='away'?'away':'offline';
+    lane.innerHTML = `
+      <div class="lane-header" onclick="focusArtist('${artist.id}')">
+        <div class="lane-av ${artist.cls}${artist.you?' you':''}">
+          ${artist.id}
+          <div class="live-dot ${statusDot}"></div>
+        </div>
+        <div>
+          <div style="display:flex;align-items:center;gap:6px;">
+            <div class="lane-name">${artist.name}</div>
+            ${artist.you?'<div class="lane-you-tag">YOU</div>':''}
+          </div>
+          <div class="lane-count">${items.length} upload${items.length!==1?'s':''} today · ${artist.status}</div>
+        </div>
+      </div>
+    `;
+
+    if(items.length === 0) {
+      lane.innerHTML += `<div class="lane-empty"><div class="lane-empty-icon">🎬</div><div class="lane-empty-txt">${artist.status==='offline'?'Offline today':'No uploads yet'}</div></div>`;
+    } else {
+      items.forEach((item, i) => {
+        const card = document.createElement('div');
+        card.className = 'lane-card';
+        card.onclick = () => openFromTeam(artist.id, item);
+
+        const canvasId = `tv-${artist.id}-${i}`;
+        const visColor = VIS_COLORS[item.vis];
+        const statColor = STATUS_COLORS[item.status];
+
+        card.innerHTML = `
+          <canvas id="${canvasId}" width="220" height="124" style="display:block;width:100%;"></canvas>
+          <div class="lane-card-info">
+            <div class="lci-name">${item.name}</div>
+            <div class="lci-meta">
+              <span class="lci-type">${item.type}</span>
+              ${item.notes>0?`<span class="lci-notes"><svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>${item.notes}</span>`:''}
+              <div class="lci-vis" style="background:${visColor}" title="${item.vis}"></div>
+              <div class="lci-status" style="background:${statColor}" title="${item.status}"></div>
+            </div>
+          </div>
+        `;
+        lane.appendChild(card);
+
+        // Draw canvas after insert
+        requestAnimationFrame(()=>{
+          const c = document.getElementById(canvasId);
+          if(c) drawTeamThumb(c, item.pal, 220, 124, item.name);
+        });
+      });
+    }
+    scroll.appendChild(lane);
+  });
+}
+
+function drawTeamThumb(canvas, pal, w, h, label) {
+  canvas.width = w; canvas.height = h;
+  const ctx = canvas.getContext('2d');
+  // bg gradient
+  const g = ctx.createLinearGradient(0,0,w,h);
+  g.addColorStop(0, pal[0]); g.addColorStop(1, pal[0]+'cc');
+  ctx.fillStyle = g; ctx.fillRect(0,0,w,h);
+  // radial glow
+  ctx.globalAlpha = .5;
+  const rg = ctx.createRadialGradient(w*.25,h*.5,1,w*.25,h*.5,w*.45);
+  rg.addColorStop(0, pal[1]+'88'); rg.addColorStop(1,'transparent');
+  ctx.fillStyle = rg; ctx.fillRect(0,0,w,h);
+  // circle
+  ctx.globalAlpha = .25;
+  ctx.beginPath(); ctx.arc(w*.78,h*.28,h*.42,0,Math.PI*2);
+  ctx.fillStyle = pal[2]+'66'; ctx.fill();
+  // scan lines (subtle texture)
+  ctx.globalAlpha = .04;
+  for(let y=0;y<h;y+=3){ctx.fillStyle='#fff';ctx.fillRect(0,y,w,1);}
+  ctx.globalAlpha = 1;
+  // label
+  ctx.font = `600 ${Math.floor(h*.13)}px Syne,sans-serif`;
+  ctx.fillStyle = 'rgba(255,255,255,.55)';
+  const short = label.length>14?label.slice(0,13)+'…':label;
+  ctx.fillText(short, 10, h*.82);
+}
+
+function focusArtist(id) {
+  if(teamFocusId === id) {
+    // Unfocus
+    teamFocusId = null;
+    document.querySelectorAll('.artist-lane').forEach(l=>{l.classList.remove('dimmed','focused');});
+    return;
+  }
+  teamFocusId = id;
+  document.querySelectorAll('.artist-lane').forEach(l=>{
+    if(l.id === 'lane-'+id){l.classList.remove('dimmed');l.classList.add('focused');}
+    else{l.classList.add('dimmed');l.classList.remove('focused');}
+  });
+}
+
+function teamFilter(f, btn) {
+  document.querySelectorAll('.tf-chip').forEach(c=>c.classList.remove('active'));
+  btn.classList.add('active');
+  renderTeamLanes(f);
+}
+
+function openFromTeam(artistId, item) {
+  closeTeamView();
+  toast(`Opening ${item.name}`, '#e8ff47');
+}
+
+// Update team view lane clicks to open Deep Dive instead
+// (handled inside renderTeamLanes via the lane-header click)
+
+// ══════════════════════════════════════════
+// DEEP DIVE
+// ══════════════════════════════════════════
+
+// Full history data — each artist, each day
+const HISTORY = {
+  JK: [
+    { date:'12 MAR 2026', rel:'Today', today:true, uploads:[
+      {name:'Brand_Ident_v04',type:'MOV',notes:5,vis:'public',status:'review',pal:['#1a1a2e','#7b61ff','#e8ff47']},
+      {name:'Client_Pitch_v02',type:'MP4',notes:2,vis:'restricted',status:'review',pal:['#1a0a0a','#ff6b6b','#ff9f43']},
+      {name:'Particle_test_01',type:'MP4',notes:1,vis:'public',status:'new',pal:['#0a0a1a','#7b61ff','#61c8ff']},
+      {name:'Styleframes_R3',type:'PSD',notes:0,vis:'private',status:'new',pal:['#0f0f18','#e8ff47','#7b61ff']},
+      {name:'Directors_Cut_WIP',type:'MOV',notes:3,vis:'private',status:'review',pal:['#120a0a','#ff6b6b','#ffcc44']},
+    ]},
+    { date:'11 MAR 2026', rel:'Yesterday', uploads:[
+      {name:'Brand_Ident_v03',type:'MOV',notes:6,vis:'public',status:'approved',pal:['#1a1a2e','#e8ff47','#7b61ff']},
+      {name:'Logo_anim_R2',type:'MOV',notes:2,vis:'public',status:'approved',pal:['#0a1220','#61c8ff','#e8ff47']},
+      {name:'Titles_rough',type:'AEP',notes:4,vis:'restricted',status:'review',pal:['#120818','#7b61ff','#ff6b6b']},
+    ]},
+    { date:'10 MAR 2026', rel:'Mon', uploads:[
+      {name:'Brand_Ident_v02',type:'MOV',notes:8,vis:'public',status:'approved',pal:['#1a1a2e','#7b61ff','#6dff6d']},
+      {name:'Moodboard_R1',type:'PSD',notes:3,vis:'public',status:'approved',pal:['#0a0a12','#e8ff47','#ff6b6b']},
+    ]},
+    { date:'7 MAR 2026', rel:'Fri', uploads:[
+      {name:'Brand_Ident_v01',type:'MOV',notes:11,vis:'public',status:'approved',pal:['#180a18','#ff6b6b','#ffcc44']},
+      {name:'Concept_board',type:'PDF',notes:5,vis:'restricted',status:'approved',pal:['#0a1218','#61c8ff','#7b61ff']},
+      {name:'Ref_motion_test',type:'MP4',notes:1,vis:'public',status:'approved',pal:['#0a1a0a','#6dff6d','#e8ff47']},
+    ]},
+    { date:'6 MAR 2026', rel:'Thu', uploads:[
+      {name:'Kickoff_deck',type:'PDF',notes:2,vis:'restricted',status:'approved',pal:['#101018','#7b61ff','#e8ff47']},
+    ]},
+  ],
+  MR: [
+    { date:'12 MAR 2026', rel:'Today', today:true, uploads:[
+      {name:'CG_Render_v01',type:'EXR',notes:3,vis:'restricted',status:'review',pal:['#0a1a12','#6dff6d','#e8ff47']},
+      {name:'Styleframes_v2',type:'PSD',notes:1,vis:'restricted',status:'new',pal:['#1a1208','#ffcc44','#ff9f43']},
+      {name:'Particle_v2_final',type:'MP4',notes:0,vis:'public',status:'approved',pal:['#0a1220','#61c8ff','#7b61ff']},
+      {name:'Lighting_pass_A',type:'EXR',notes:2,vis:'public',status:'review',pal:['#0d1a0d','#6dff6d','#61c8ff']},
+    ]},
+    { date:'11 MAR 2026', rel:'Yesterday', uploads:[
+      {name:'CG_blockout_v3',type:'EXR',notes:4,vis:'public',status:'approved',pal:['#0a1818','#61c8ff','#6dff6d']},
+      {name:'Particle_v1',type:'MP4',notes:7,vis:'public',status:'approved',pal:['#0a0a1a','#7b61ff','#61c8ff']},
+    ]},
+    { date:'10 MAR 2026', rel:'Mon', uploads:[
+      {name:'CG_blockout_v2',type:'EXR',notes:5,vis:'restricted',status:'approved',pal:['#101818','#6dff6d','#ffcc44']},
+      {name:'Styleframes_v1',type:'PSD',notes:3,vis:'restricted',status:'approved',pal:['#181008','#ffcc44','#ff9f43']},
+      {name:'Lighting_ref',type:'EXR',notes:1,vis:'public',status:'approved',pal:['#0d180d','#6dff6d','#e8ff47']},
+    ]},
+  ],
+  AL: [
+    { date:'12 MAR 2026', rel:'Today', today:true, uploads:[
+      {name:'Titles_v03',type:'AEP',notes:4,vis:'public',status:'review',pal:['#1a0a0a','#ff6b6b','#ffcc44']},
+      {name:'Endcard_R1',type:'MOV',notes:1,vis:'public',status:'approved',pal:['#100a1a','#ff6b6b','#7b61ff']},
+    ]},
+    { date:'11 MAR 2026', rel:'Yesterday', uploads:[
+      {name:'Titles_v02',type:'AEP',notes:6,vis:'public',status:'approved',pal:['#180808','#ff6b6b','#e8ff47']},
+      {name:'Lower_thirds_R2',type:'MOV',notes:2,vis:'public',status:'approved',pal:['#100a18','#7b61ff','#ff6b6b']},
+    ]},
+    { date:'10 MAR 2026', rel:'Mon', uploads:[
+      {name:'Titles_v01',type:'AEP',notes:9,vis:'public',status:'approved',pal:['#1a1008','#ffcc44','#ff6b6b']},
+    ]},
+  ],
+  DC: [
+    { date:'12 MAR 2026', rel:'Today', today:true, uploads:[
+      {name:'Comp_v06',type:'MOV',notes:2,vis:'public',status:'review',pal:['#0a1218','#61c8ff','#7b61ff']},
+      {name:'FX_layer_B',type:'MOV',notes:0,vis:'public',status:'new',pal:['#0a1015','#61c8ff','#e8ff47']},
+      {name:'Grade_LUT_test',type:'MOV',notes:3,vis:'restricted',status:'review',pal:['#12101a','#7b61ff','#61c8ff']},
+      {name:'Conform_master',type:'XML',notes:1,vis:'restricted',status:'review',pal:['#101018','#7b61ff','#ffcc44']},
+      {name:'Output_H264',type:'MP4',notes:0,vis:'public',status:'approved',pal:['#0a120e','#6dff6d','#e8ff47']},
+    ]},
+    { date:'11 MAR 2026', rel:'Yesterday', uploads:[
+      {name:'Comp_v05',type:'MOV',notes:3,vis:'public',status:'approved',pal:['#0a1020','#61c8ff','#7b61ff']},
+      {name:'FX_layer_A',type:'MOV',notes:2,vis:'public',status:'approved',pal:['#080f14','#61c8ff','#6dff6d']},
+    ]},
+    { date:'10 MAR 2026', rel:'Mon', uploads:[
+      {name:'Comp_v04',type:'MOV',notes:5,vis:'public',status:'approved',pal:['#0a0f18','#7b61ff','#61c8ff']},
+      {name:'Grade_v1',type:'MOV',notes:2,vis:'restricted',status:'approved',pal:['#101018','#7b61ff','#e8ff47']},
+    ]},
+  ],
+  SM: [
+    { date:'11 MAR 2026', rel:'Yesterday', uploads:[
+      {name:'Sound_design_R1',type:'WAV',notes:1,vis:'public',status:'approved',pal:['#0a1208','#6dff6d','#ffcc44']},
+    ]},
+  ],
+};
+
+// "All" mode — merge and sort by date
+function buildAllHistory() {
+  const byDate = {};
+  Object.entries(HISTORY).forEach(([id, days]) => {
+    const artist = TEAM.find(t => t.id === id);
+    days.forEach(day => {
+      if(!byDate[day.date]) byDate[day.date] = {date:day.date, rel:day.rel, today:day.today||false, uploads:[]};
+      day.uploads.forEach(u => byDate[day.date].uploads.push({...u, artistId:id, artistCls:artist.cls, artistName:artist.name}));
+    });
+  });
+  // Sort dates descending
+  return Object.values(byDate).sort((a,b) => new Date(b.date)-new Date(a.date));
+}
+
+let diveMode = 'single'; // 'single' | 'all'
+let diveArtistId = null;
+let diveViewStyle = 'grid'; // 'grid' | 'dense' | 'strip'
+let diveFilterVal = 'all';
+
+function openDive(artistId) {
+  diveArtistId = artistId;
+  diveMode = artistId === 'ALL' ? 'all' : 'single';
+  diveFilterVal = 'all';
+  diveViewStyle = 'grid';
+  // Reset filter chips
+  document.querySelectorAll('.df-chip').forEach((c,i)=>c.classList.toggle('active',i===0));
+  // Reset view toggle
+  ['grid','dense','strip'].forEach(v => document.getElementById('dvt-'+v)?.classList.toggle('active', v==='grid'));
+  buildDiveHeader();
+  renderDive();
+  document.getElementById('diveOverlay').classList.add('open');
+}
+
+function closeDive() {
+  document.getElementById('diveOverlay').classList.remove('open');
+  // Reopen team view if came from there
+  setTimeout(() => openTeamView(), 50);
+}
+
+function buildDiveHeader() {
+  const av = document.getElementById('diveAv');
+  const who = document.getElementById('diveWho');
+  const stats = document.getElementById('diveStats');
+  const switcher = document.getElementById('diveSwitcher');
+
+  if(diveMode === 'all') {
+    av.className = 'dive-artist-av';
+    av.style.cssText = 'background:linear-gradient(135deg,#2d1b4e 0%,#1b3a1b 50%,#1a2a3a 100%);font-size:9px;color:rgba(255,255,255,.7);';
+    av.textContent = '★';
+    who.textContent = 'All Artists';
+    const total = Object.values(HISTORY).reduce((s,d)=>s+d.reduce((ss,day)=>ss+day.uploads.length,0),0);
+    const days = new Set(Object.values(HISTORY).flatMap(d=>d.map(day=>day.date))).size;
+    stats.innerHTML = `<span>${total}</span> uploads across <span>${days}</span> days`;
+  } else {
+    const artist = TEAM.find(t => t.id === diveArtistId);
+    av.className = `dive-artist-av ${artist.cls}`;
+    av.style.cssText = '';
+    av.textContent = artist.id;
+    who.textContent = artist.name + (artist.you ? ' (you)' : '');
+    const history = HISTORY[diveArtistId] || [];
+    const total = history.reduce((s,d)=>s+d.uploads.length,0);
+    stats.innerHTML = `<span>${total}</span> uploads across <span>${history.length}</span> days`;
+  }
+
+  // Build artist switcher pills
+  switcher.innerHTML = '';
+  // "All" pill
+  const allPill = document.createElement('div');
+  allPill.className = 'ds-pill' + (diveMode==='all' ? ' active' : '');
+  allPill.innerHTML = `<span style="font-size:10px;">★</span> All`;
+  allPill.onclick = () => { diveMode='all'; diveArtistId='ALL'; buildDiveHeader(); renderDive(); };
+  switcher.appendChild(allPill);
+
+  TEAM.filter(t=>!t.id||true).forEach(artist => {
+    const pill = document.createElement('div');
+    pill.className = 'ds-pill' + (diveMode==='single' && diveArtistId===artist.id ? ' active' : '');
+    const dotColor = artist.status==='online'?'#6dff6d':artist.status==='away'?'#ffcc44':'var(--border2)';
+    pill.innerHTML = `<div class="ds-av ${artist.cls}">${artist.id}</div>${artist.name.split(' ')[0]}`;
+    pill.onclick = () => { diveMode='single'; diveArtistId=artist.id; buildDiveHeader(); renderDive(); };
+    switcher.appendChild(pill);
+  });
+}
+
+function renderDive() {
+  const body = document.getElementById('diveBody');
+  body.innerHTML = '';
+  const days = diveMode === 'all' ? buildAllHistory() : (HISTORY[diveArtistId] || []);
+
+  days.forEach(day => {
+    let uploads = day.uploads;
+    // Apply filter
+    if(diveFilterVal === 'video') uploads = uploads.filter(u=>['MOV','MP4','AVI','EXR'].includes(u.type));
+    if(diveFilterVal === 'still') uploads = uploads.filter(u=>['PSD','PDF','PNG','JPG'].includes(u.type));
+    if(diveFilterVal === 'open') uploads = uploads.filter(u=>u.notes>0);
+    if(diveFilterVal === 'approved') uploads = uploads.filter(u=>u.status==='approved');
+    if(uploads.length === 0) return;
+
+    const section = document.createElement('div');
+    section.className = 'dive-day-section';
+
+    // Day header
+    const hdr = document.createElement('div');
+    hdr.className = 'dive-day-header';
+    hdr.innerHTML = `
+      <div class="ddh-date">${day.date}</div>
+      <div class="ddh-rel">${day.rel}</div>
+      ${day.today ? '<div class="ddh-today-tag">TODAY</div>' : ''}
+      <div class="ddh-line"></div>
+      <div class="ddh-count">${uploads.length} upload${uploads.length!==1?'s':''}</div>
+    `;
+    section.appendChild(hdr);
+
+    // Grid
+    const grid = document.createElement('div');
+    grid.className = `dive-grid ${diveViewStyle}`;
+    uploads.forEach((item, i) => {
+      const card = document.createElement('div');
+      card.className = 'dive-card';
+      card.onclick = () => openFromDive(item);
+
+      const canvasId = `dc-${day.date.replace(/ /g,'-')}-${diveArtistId||'ALL'}-${i}`;
+      const visColor = {public:'#6dff6d',restricted:'var(--accent2)',private:'var(--accent3)'}[item.vis];
+      const statColor = {new:'var(--accent)',review:'var(--accent2)',approved:'#6dff6d'}[item.status];
+      const artistEl = diveMode==='all' && item.artistId
+        ? `<div class="dci-artist-av ${item.artistCls}" style="margin-right:3px;">${item.artistId}</div>` : '';
+
+      card.innerHTML = `
+        <canvas id="${canvasId}" width="178" height="100" style="display:block;width:100%;"></canvas>
+        <div class="dc-play"><div class="dc-play-btn"><svg width="12" height="12" viewBox="0 0 24 24" fill="#0a0a0c"><polygon points="5,3 19,12 5,21"/></svg></div></div>
+        <div class="dive-card-info">
+          <div class="dci-row1">${artistEl}<div class="dci-name">${item.name}</div></div>
+          <div class="dci-meta">
+            <span class="dci-type">${item.type}</span>
+            ${item.notes>0?`<span class="dci-notes"><svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>${item.notes}</span>`:''}
+            <div class="dci-pip" style="background:${visColor};width:5px;height:5px;border-radius:50%;flex-shrink:0;" title="${item.vis}"></div>
+            <div class="dci-pip" style="background:${statColor};width:5px;height:5px;border-radius:50%;flex-shrink:0;" title="${item.status}"></div>
+          </div>
+        </div>
+      `;
+      grid.appendChild(card);
+
+      requestAnimationFrame(() => {
+        const c = document.getElementById(canvasId);
+        if(c) drawDiveThumb(c, item.pal, item.name);
+      });
+    });
+    section.appendChild(grid);
+    body.appendChild(section);
+  });
+
+  if(body.children.length === 0) {
+    body.innerHTML = `<div style="text-align:center;padding:60px;color:var(--text3);font-size:13px;">No uploads match this filter.</div>`;
+  }
+}
+
+function drawDiveThumb(canvas, pal, label) {
+  const W = canvas.parentElement?.clientWidth || 178;
+  const H = Math.round(W * 9/16);
+  canvas.width = W; canvas.height = H;
+  const ctx = canvas.getContext('2d');
+  const g = ctx.createLinearGradient(0,0,W,H);
+  g.addColorStop(0, pal[0]); g.addColorStop(1, pal[0]+'cc');
+  ctx.fillStyle = g; ctx.fillRect(0,0,W,H);
+  ctx.globalAlpha = .45;
+  const rg = ctx.createRadialGradient(W*.3,H*.5,1,W*.3,H*.5,W*.42);
+  rg.addColorStop(0, pal[1]+'88'); rg.addColorStop(1,'transparent');
+  ctx.fillStyle = rg; ctx.fillRect(0,0,W,H);
+  ctx.globalAlpha = .22;
+  ctx.beginPath(); ctx.arc(W*.78,H*.28,H*.45,0,Math.PI*2);
+  ctx.fillStyle = pal[2]+'66'; ctx.fill();
+  ctx.globalAlpha = .04;
+  for(let y=0;y<H;y+=3){ctx.fillStyle='#fff';ctx.fillRect(0,y,W,1);}
+  ctx.globalAlpha = 1;
+  ctx.font = `500 ${Math.max(9,Math.floor(H*.13))}px Syne,sans-serif`;
+  ctx.fillStyle = 'rgba(255,255,255,.5)';
+  const short = label.length>16 ? label.slice(0,15)+'…' : label;
+  ctx.fillText(short, 8, H*.84);
+}
+
+function openFromDive(item) {
+  document.getElementById('diveOverlay').classList.remove('open');
+  document.getElementById('teamOverlay').classList.remove('open');
+  toast(`Opening ${item.name}`, '#e8ff47');
+}
+
+function diveFilter(f, btn) {
+  diveFilterVal = f;
+  document.querySelectorAll('.df-chip').forEach(c=>c.classList.remove('active'));
+  btn.classList.add('active');
+  renderDive();
+}
+
+function setDiveView(v, btn) {
+  diveViewStyle = v;
+  ['grid','dense','strip'].forEach(id => document.getElementById('dvt-'+id)?.classList.toggle('active', id===v));
+  renderDive();
+}
+
+// Wire up Team View lane headers to open Deep Dive
+function renderTeamLanesWithDive(filter) {
+  renderTeamLanes(filter);
+  // Override lane header click to open Deep Dive
+  document.querySelectorAll('.artist-lane .lane-header').forEach(hdr => {
+    const laneId = hdr.closest('.artist-lane').id.replace('lane-','');
+    hdr.onclick = (e) => { e.stopPropagation(); openDive(laneId); };
+  });
+  // Wire card clicks to open Deep Dive
+  document.querySelectorAll('.lane-card').forEach(card => {
+    card.onclick = (e) => {
+      const laneId = card.closest('.artist-lane').id.replace('lane-','');
+      openDive(laneId);
+    };
+  });
+}
+
+// Override openTeamView to use wired version
+const _origOpenTeamView = openTeamView;
+function openTeamView(focusId) {
+  renderTeamLanesWithDive();
+  document.getElementById('teamOverlay').classList.add('open');
+  if(focusId) focusArtist(focusId);
+}
+
+// Escape key chain: dive → team → main
+document.addEventListener('keydown', e => {
+  if(e.key !== 'Escape') return;
+  if(document.getElementById('diveOverlay').classList.contains('open')){
+    document.getElementById('diveOverlay').classList.remove('open');
+    setTimeout(()=>document.getElementById('teamOverlay').classList.add('open'),50);
+  } else if(document.getElementById('teamOverlay').classList.contains('open')){
+    closeTeamView();
+  }
+});
+
+
+document.querySelectorAll('.fchip').forEach(c=>c.addEventListener('click',function(){document.querySelectorAll('.fchip').forEach(x=>x.classList.remove('active'));this.classList.add('active');}));
+
+// ── DATE ───────────────────────────────────────────────────
+function setTodayDate(){
+  const d=new Date();const days=['SUN','MON','TUE','WED','THU','FRI','SAT'];const months=['JAN','FEB','MAR','APR','MAY','JUN','JUL','AUG','SEP','OCT','NOV','DEC'];
+  const short=`${days[d.getDay()]} ${d.getDate()} ${months[d.getMonth()]}`;
+  const full=`${short} ${d.getFullYear()}`;
+  document.getElementById('todayDate').textContent=full;
+  const tb=document.getElementById('topbarDate');
+  if(tb)tb.textContent=short;
+}
+
+// ── INIT ───────────────────────────────────────────────────
+(function init(){
+  framePos=68; frame=68;
+  setTodayDate();
+  ITEMS.forEach((item,i)=>{
+    const c=document.getElementById('tc-'+i);
+    if(c) drawThumb(c, PALETTES[i], item.locked||false);
+  });
+  drawMainCanvas(0);
+  buildWave();
+  refreshUI();
+  const ro=new ResizeObserver(()=>drawMainCanvas(curIdx));
+  ro.observe(document.getElementById('videoFrame'));
+  const waveRO=new ResizeObserver(()=>drawWave());
+  waveRO.observe(document.getElementById('timeline'));
+})();
+
+// ══════════════════════════════════════════
+// ROLE SYSTEM
+// ══════════════════════════════════════════
+const ROLE_DATA = {
+  admin:   { label:'Admin',      name:'Jamie K',  id:'JK', cls:'rp-admin',   avBg:'#2d1b4e', avFg:'#7b61ff' },
+  manager: { label:'CD / AD',   name:'Marcus R', id:'MR', cls:'rp-manager', avBg:'#1b3a1b', avFg:'#6dff6d' },
+  artist:  { label:'Artist',    name:'Aiko L',   id:'AL', cls:'rp-artist',  avBg:'#3a1b1b', avFg:'#ff6b6b' },
+};
+let currentRole = null;
+
+function signIn() {
+  document.getElementById('roleScreen').classList.add('hidden');
+  applyRole('admin');
+}
+
+function showRoleScreen() {
+  document.getElementById('roleScreen').classList.remove('hidden');
+}
+
+function applyRole(role) {
+  const r = ROLE_DATA[role];
+  const isLead = role === 'admin' || role === 'manager';
+
+  // 1. Role pill in topbar
+  const pillWrap = document.getElementById('rolePillWrap');
+  pillWrap.innerHTML = `<div class="role-pill ${r.cls}"><div class="rp-dot"></div>${r.label} — ${r.name}</div>`;
+
+  // 2. Approve bar
+  const approveBar = document.getElementById('approveBar');
+  approveBar.style.display = isLead ? 'flex' : 'none';
+
+  // 3. Download button in viewer header — hide for artists
+  const dlBtn = document.getElementById('dlBtn');
+  if (dlBtn) dlBtn.style.display = isLead ? '' : 'none';
+
+  // 4. Sidebar items — apply visibility rules
+  applyVisibilityRules(role);
+
+  // 5. Review queue banner in comment panel
+  buildReviewQueueBanner(role);
+
+  // 6. Apply lead-comment borders to existing comments
+  applyLeadCommentStyles();
+
+  // 7. Update "you" avatar ring in topbar (who "you" are changes per role)
+  updateYouAvatar(r);
+
+  // 8. Update comment input placeholder
+  const ta = document.getElementById('commentInput');
+  if (ta) ta.placeholder = isLead ? 'Leave direction at this frame…' : 'Add a note at this frame…';
+
+  // 9. Reset approval state
+  setApprovalState(null);
+}
+
+function updateYouAvatar(r) {
+  // Remove you-ring from all avatars, re-apply to the role's avatar
+  document.querySelectorAll('.avatar-p').forEach(av => {
+    av.classList.remove('you-ring');
+    // Remove YOU label
+    const tip = av.querySelector('.av-tip-status');
+    if (tip) tip.textContent = tip.textContent.replace(' — you','');
+  });
+  // Apply to matching avatar
+  const allAv = document.querySelectorAll('.avatar-p');
+  allAv.forEach(av => {
+    if (av.textContent.includes(r.id)) {
+      av.classList.add('you-ring');
+      const tip = av.querySelector('.av-tip-status');
+      if (tip && !tip.textContent.includes('you')) tip.textContent += ' — you';
+    }
+  });
+}
+
+function applyVisibilityRules(role) {
+  const isLead = role === 'admin' || role === 'manager';
+  // In the sidebar, items that are private and NOT owned by the current user
+  // should be greyed out for artists
+  document.querySelectorAll('.thumb-item').forEach((el, idx) => {
+    const item = ITEMS[idx];
+    if (!item) return;
+    if (!isLead && item.vis === 'private' && item.author !== ROLE_DATA[role].id) {
+      el.classList.add('hidden-private');
+    } else {
+      el.classList.remove('hidden-private');
+    }
+  });
+}
+
+function buildReviewQueueBanner(role) {
+  const banner = document.getElementById('reviewQueueBanner');
+  const isLead = role === 'admin' || role === 'manager';
+  if (!isLead) { banner.innerHTML = ''; return; }
+  // Items awaiting review — vis=restricted and status=review represent "for review" items
+  const forReview = ITEMS.filter(i => i.vis === 'restricted' && i.status === 'review');
+  if (forReview.length === 0) { banner.innerHTML = ''; return; }
+  let html = `<div class="review-queue-banner"><div class="rqb-title">
+    <svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20,6 9,17 4,12"/></svg>
+    Awaiting your review
+  </div>`;
+  forReview.forEach(item => {
+    const authorName = {JK:'Jamie K',MR:'Marcus R',AL:'Aiko L',DC:'Dev Chen',SM:'Sara M'}[item.author]||item.author;
+    html += `<div class="rqb-item" onclick="loadItem(${ITEMS.indexOf(item)},null)">
+      <div class="rqb-dot"></div>
+      <div class="rqb-name">${item.name.replace(/\.(mov|mp4|psd|exr)$/i,'')}</div>
+      <div class="rqb-who">${authorName.split(' ')[0]}</div>
+    </div>`;
+  });
+  html += '</div>';
+  banner.innerHTML = html;
+}
+
+function applyLeadCommentStyles() {
+  // Mark existing JK (admin) and MR (manager) comment items with accent border
+  const commentMap = {c1:'admin',c2:'admin',c3:'manager',c5:'manager'};
+  Object.entries(commentMap).forEach(([id, role]) => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.classList.remove('lead-comment','admin-comment');
+    if (role === 'admin') el.classList.add('admin-comment');
+    else if (role === 'manager') el.classList.add('lead-comment');
+  });
+}
+
+// ── SETUP FLOW ──────────────────────────────────────────────
+function setupYes() {
+  document.getElementById('spcConfig').classList.add('vis');
+  document.getElementById('ynYes').classList.add('sel');
+}
+function setupNo() {
+  toast('You can add a Dailies board any time from channel settings ⚙', '#61c8ff');
+  document.getElementById('setupOverlay').classList.remove('open');
+  applyRole('admin');
+}
+function createBoard() {
+  toast('Dailies board created for #nuance-switch 🎬', '#e8ff47');
+  setTimeout(() => {
+    document.getElementById('setupOverlay').classList.remove('open');
+    applyRole('admin');
+  }, 700);
+}
+
+// ── APPROVE / REQUEST CHANGES ───────────────────────────────
+let approvalState = null; // null | 'approved' | 'changes'
+
+function toggleApprove() {
+  approvalState = approvalState === 'approved' ? null : 'approved';
+  setApprovalState(approvalState);
+  toast(approvalState === 'approved' ? '✓ Marked as approved' : 'Approval removed',
+        approvalState === 'approved' ? '#6dff6d' : '#ff6b6b');
+}
+function toggleChanges() {
+  approvalState = approvalState === 'changes' ? null : 'changes';
+  setApprovalState(approvalState);
+  toast(approvalState === 'changes' ? 'Changes requested — artist notified' : 'Request removed',
+        approvalState === 'changes' ? '#ff6b6b' : '#888');
+}
+function setApprovalState(state) {
+  approvalState = state;
+  const stamp = document.getElementById('approvalStamp');
+  const appBtn = document.getElementById('abApprove');
+  const chgBtn = document.getElementById('abChanges');
+  if (!stamp) return;
+  if (state === 'approved') {
+    stamp.className = 'approval-stamp approved';
+    stamp.innerHTML = `<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20,6 9,17 4,12"/></svg> APPROVED`;
+    if (appBtn) appBtn.classList.add('active');
+    if (chgBtn) chgBtn.classList.remove('active');
+  } else if (state === 'changes') {
+    stamp.className = 'approval-stamp changes';
+    stamp.innerHTML = `<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg> CHANGES REQUESTED`;
+    if (appBtn) appBtn.classList.remove('active');
+    if (chgBtn) chgBtn.classList.add('active');
+  } else {
+    stamp.className = 'approval-stamp';
+    stamp.textContent = '';
+    if (appBtn) appBtn.classList.remove('active');
+    if (chgBtn) chgBtn.classList.remove('active');
+  }
+}
+
+// ── OVERRIDE postComment to include role badge ───────────────
+const _origPostComment = postComment;
+window.postComment = function() {
+  const inp = document.getElementById('commentInput');
+  const txt = inp?.value?.trim();
+  if (!txt) return;
+  const role = currentRole || 'artist';
+  const r = ROLE_DATA[role] || ROLE_DATA.artist;
+  const isLead = role === 'admin' || role === 'manager';
+  const isAdmin = role === 'admin';
+  const list = document.getElementById('commentsList');
+  const t = tc(frame);
+  const badgeHTML = isAdmin
+    ? `<span class="ci-role-badge crb-admin">ADMIN</span>`
+    : isLead ? `<span class="ci-role-badge crb-manager">CD</span>` : '';
+  const borderClass = isAdmin ? 'citem active admin-comment' : isLead ? 'citem active lead-comment' : 'citem active';
+  const d = document.createElement('div');
+  d.className = borderClass;
+  d.innerHTML = `<div class="cstat st-open"></div>
+    <div class="ci-hd">
+      <div class="ci-av" style="background:${r.avBg};color:${r.avFg};">${r.id}</div>
+      <div class="ci-nm">${r.name} (you)</div>
+      ${badgeHTML}
+      <div class="ci-tc">${t}</div>
+    </div>
+    <div class="ci-body">${txt}</div>
+    <div class="ci-foot"><span class="ci-rx">just now</span><span class="ci-rp">Reply</span></div>`;
+  document.querySelectorAll('.citem').forEach(c => c.classList.remove('active'));
+  list.insertBefore(d, list.firstChild);
+  inp.value = '';
+  toast(isLead ? 'Direction posted — badged as ' + (isAdmin ? 'Admin' : 'CD') : 'Note posted',
+        isAdmin ? '#ff9f43' : isLead ? '#e8ff47' : '#61c8ff');
+};
+
+// ── BOARD SWITCHING ────────────────────────────────────────
+const BOARD_MEMBERS = {
+  JK: { name:'Jamie K',  initials:'JK', apClass:'ap1', bg:'#2d1b4e', fg:'#7b61ff', status:'online',  role:'Admin'  },
+  MR: { name:'Marcus R', initials:'MR', apClass:'ap2', bg:'#1b3a1b', fg:'#6dff6d', status:'online',  role:'CD'     },
+  AL: { name:'Aiko L',   initials:'AL', apClass:'ap3', bg:'#3a1b1b', fg:'#ff6b6b', status:'away',    role:'Artist' },
+  DC: { name:'Dev Chen', initials:'DC', apClass:'ap4', bg:'#1a2a3a', fg:'#61c8ff', status:'online',  role:'TD'     },
+  SM: { name:'Sara M',   initials:'SM', apClass:'ap5', bg:'#2a2a1a', fg:'#ffcc44', status:'offline', role:'Artist' },
+};
+
+function switchBoard(id) {
+  const m = BOARD_MEMBERS[id];
+  if (!m) return;
+
+  // Update owner avatar
+  const ownerAv = document.querySelector('.board-owner-av');
+  const dot = ownerAv.querySelector('.live-dot');
+  ownerAv.style.background = m.bg;
+  ownerAv.style.color = m.fg;
+  // Update initials text node (first text node only)
+  const textNode = [...ownerAv.childNodes].find(n => n.nodeType === 3);
+  if (textNode) textNode.textContent = m.initials;
+  if (dot) dot.className = `live-dot ${m.status}`;
+
+  // Update board name
+  const youLabel = id === 'JK' ? ` <span style="font-family:'DM Mono',monospace;font-size:11px;font-weight:400;color:var(--accent);opacity:.7;">(you)</span>` : '';
+  document.querySelector('.board-owner-name').innerHTML = `${id === 'JK' ? 'Jamie K' : m.name}'s Daily${youLabel}`;
+
+  // Highlight the active avatar in the member cluster with their colour
+  document.querySelectorAll('.member-avatars .avatar-p').forEach(av => {
+    av.style.borderColor = '';
+    av.style.boxShadow = '';
+  });
+  const allAv = [...document.querySelectorAll('.member-avatars .avatar-p')];
+  const activeAv = allAv.find(av => av.textContent.trim().slice(0,2) === id);
+  if (activeAv) {
+    activeAv.style.borderColor = m.fg;
+    activeAv.style.boxShadow = `0 0 0 1px ${m.fg}22`;
+  }
+
+  // Update sidebar header label
+  const lbl = document.querySelector('.today-label');
+  if (lbl) lbl.textContent = id === 'JK' ? "Today's Daily" : `${m.name.split(' ')[0]}'s Daily`;
+
+  toast(id === 'JK' ? 'Your daily board' : `Viewing ${m.name}'s daily`, m.fg);
+}
+
+// ── AUTO-INIT: show role screen on load ─────────────────────
+window.addEventListener('load', () => {
+  // Role screen is already visible (no hidden class by default)
+  // Apply lead comment styles for initial view
+  applyLeadCommentStyles();
+});
+</script>
+</body>
+</html>
